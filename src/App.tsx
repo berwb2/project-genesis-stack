@@ -1,12 +1,12 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from './contexts/AuthContext';
-import { SoundProvider, useSound } from './contexts/SoundContext';
+import { SoundProvider } from './contexts/SoundContext';
 
 import Index from './pages/Index';
 import Login from './pages/Login';
@@ -23,16 +23,9 @@ import Calendar from './pages/Calendar';
 import Books from './pages/Books';
 import BookWriter from './pages/BookWriter';
 import GrandStrategist from './pages/GrandStrategist';
+import AIPlayground from './pages/AIPlayground';
 
-// Component that plays the welcome sound
-function AppWithSound() {
-  const { playSound } = useSound();
-  
-  // Play wave sound when app loads
-  useEffect(() => {
-    playSound('wave');
-  }, []);
-  
+function AppRoutes() {
   return (
     <TooltipProvider>
       <Routes>
@@ -51,6 +44,7 @@ function AppWithSound() {
         <Route path="/books/:id" element={<ViewDocument />} />
         <Route path="/book-writer" element={<BookWriter />} />
         <Route path="/grand-strategist" element={<GrandStrategist />} />
+        <Route path="/ai-playground" element={<AIPlayground />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </TooltipProvider>
@@ -74,7 +68,7 @@ function App() {
           <ThemeProvider defaultTheme="light" storageKey="deepwaters-theme">
             <SoundProvider>
               <Toaster />
-              <AppWithSound />
+              <AppRoutes />
             </SoundProvider>
           </ThemeProvider>
         </AuthProvider>
