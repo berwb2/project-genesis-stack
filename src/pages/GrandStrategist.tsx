@@ -1,417 +1,315 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Brain, Loader2, CheckCircle, AlertTriangle, Sparkles, Crown } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/sonner';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Brain, Send, Plus, Menu } from 'lucide-react';
-import { toast } from '@/components/ui/sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { listDocuments, getCurrentUser } from '@/lib/api';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-interface StrategistMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-}
-
-interface Conversation {
-  id: string;
-  title: string;
-  messages: StrategistMessage[];
-  lastMessage: string;
-  timestamp: string;
-  userId: string;
-}
-
 const GrandStrategist = () => {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
-  const [message, setMessage] = useState('');
+  const [prompt, setPrompt] = useState('');
+  const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [requestCount, setRequestCount] = useState(0);
   const isMobile = useIsMobile();
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: getCurrentUser,
-  });
-
-  const { data: documentsData } = useQuery({
-    queryKey: ['all-documents-for-strategist'],
-    queryFn: async () => {
-      // Fetch ALL documents without pagination limit
-      const response = await listDocuments({}, { field: 'updated_at', direction: 'desc' }, 1, 10000);
-      console.log(`Grand Strategist has access to ${response.documents.length} documents out of ${response.total} total`);
-      return response;
-    },
-    enabled: !!user,
-  });
-
-  const documents = documentsData?.documents || [];
-
-  useEffect(() => {
-    loadConversations();
-  }, [user]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [activeConversation?.messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const loadConversations = async () => {
-    if (!user) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    try {
-      const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('content_type', 'conversation')
-        .order('updated_at', { ascending: false });
-
-      if (error) throw error;
-
-      const convs = data?.map(doc => ({
-        id: doc.id,
-        title: doc.title,
-        messages: JSON.parse(doc.content || '[]'),
-        lastMessage: JSON.parse(doc.content || '[]').slice(-1)[0]?.content || 'New conversation',
-        timestamp: new Date(doc.updated_at).toLocaleDateString(),
-        userId: doc.user_id
-      })) || [];
-
-      setConversations(convs);
-    } catch (error) {
-      console.error('Error loading conversations:', error);
+    if (!prompt.trim()) {
+      toast.error('Please enter a prompt for the Grand Strategist');
+      return;
     }
-  };
 
-  const startNewConversation = async () => {
-    if (!user) return;
-
-    const newConv: Conversation = {
-      id: `conv-${Date.now()}`,
-      title: 'New Conversation',
-      messages: [],
-      lastMessage: 'New conversation',
-      timestamp: new Date().toLocaleDateString(),
-      userId: user.id
-    };
+    setIsLoading(true);
+    setError(null);
+    setResponse('');
 
     try {
-      const { data, error } = await supabase
-        .from('documents')
-        .insert({
-          user_id: user.id,
-          title: 'New Conversation',
-          content: JSON.stringify([]),
-          content_type: 'conversation'
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      newConv.id = data.id;
-      setConversations([newConv, ...conversations]);
-      setActiveConversation(newConv);
-      if (isMobile) setSidebarOpen(false);
-    } catch (error) {
-      console.error('Error creating conversation:', error);
-      toast.error('Failed to create new conversation');
-    }
-  };
-
-  const saveConversation = async (conversation: Conversation) => {
-    try {
-      const { error } = await supabase
-        .from('documents')
-        .update({
-          title: conversation.title,
-          content: JSON.stringify(conversation.messages),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', conversation.id);
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error saving conversation:', error);
-    }
-  };
-
-  const callGrandStrategist = async (userMessage: string, documentContext: any[] = []) => {
-    try {
-      console.log(`Sending ${documentContext.length} documents to Grand Strategist`);
+      console.log('Calling Grand Strategist with prompt:', prompt.substring(0, 100) + '...');
       
-      const { data, error } = await supabase.functions.invoke('grand-strategist', {
+      const { data, error: functionError } = await supabase.functions.invoke('grand-strategist', {
         body: {
-          message: userMessage,
-          documents: documentContext,
-          analysis_mode: 'chat'
+          prompt: prompt.trim(),
+          context: `User is requesting strategic assistance with: ${prompt.substring(0, 200)}`,
+          documentType: 'strategy'
         }
       });
 
-      if (error) throw error;
-      return data.response;
-    } catch (error) {
-      console.error('Grand Strategist API error:', error);
-      throw error;
-    }
-  };
+      if (functionError) {
+        console.error('Supabase function error:', functionError);
+        throw new Error(`Function call failed: ${functionError.message}`);
+      }
 
-  const sendMessage = async () => {
-    if (!message.trim() || !activeConversation || !user) return;
+      if (data?.error) {
+        console.error('Grand Strategist function returned error:', data.error);
+        throw new Error(data.error);
+      }
 
-    const userMessage: StrategistMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: message,
-      timestamp: new Date()
-    };
+      if (!data?.result) {
+        throw new Error('No response generated from Grand Strategist');
+      }
 
-    const updatedConversation = {
-      ...activeConversation,
-      messages: [...activeConversation.messages, userMessage],
-      lastMessage: message,
-      timestamp: new Date().toLocaleDateString()
-    };
-
-    if (updatedConversation.title === 'New Conversation' && message.length > 0) {
-      updatedConversation.title = message.substring(0, 50) + (message.length > 50 ? '...' : '');
-    }
-
-    setActiveConversation(updatedConversation);
-    setConversations(prevConvs => 
-      prevConvs.map(conv => conv.id === activeConversation.id ? updatedConversation : conv)
-    );
-    setMessage('');
-    setIsLoading(true);
-
-    try {
-      const response = await callGrandStrategist(message, documents);
+      setResponse(data.result);
+      setRequestCount(prev => prev + 1);
+      toast.success('Grand Strategist response generated successfully!');
       
-      const assistantMessage: StrategistMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: response,
-        timestamp: new Date()
-      };
-
-      const finalConversation = {
-        ...updatedConversation,
-        messages: [...updatedConversation.messages, assistantMessage],
-        lastMessage: response.substring(0, 100) + (response.length > 100 ? '...' : '')
-      };
-
-      setActiveConversation(finalConversation);
-      setConversations(prevConvs => 
-        prevConvs.map(conv => conv.id === activeConversation.id ? finalConversation : conv)
-      );
-
-      await saveConversation(finalConversation);
-    } catch (error) {
-      toast.error('Failed to get response from Grand Strategist');
-      console.error('Grand Strategist error:', error);
+    } catch (err: any) {
+      console.error('Grand Strategist error:', err);
+      const errorMessage = err.message || 'Failed to get response from Grand Strategist';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+  const clearAll = () => {
+    setPrompt('');
+    setResponse('');
+    setError(null);
   };
 
+  const samplePrompts = [
+    "Help me create a comprehensive business strategy for launching a new product",
+    "Analyze the competitive landscape for AI-powered document management tools",
+    "Develop a content strategy for increasing user engagement on our platform",
+    "Create a project roadmap for implementing advanced AI features",
+    "Design a framework for measuring success in document collaboration tools"
+  ];
+
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
       <Navbar />
       <MobileNav />
       
-      <div className="flex flex-1">
+      <div className="flex">
         {!isMobile && <Sidebar />}
         
-        {/* Conversation Sidebar */}
-        {isMobile && sidebarOpen && (
-          <div className="fixed inset-0 z-40 bg-black bg-opacity-50" onClick={() => setSidebarOpen(false)}>
-            <div className="w-80 h-full bg-white" onClick={e => e.stopPropagation()}>
-              <div className="p-4 border-b">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-gray-900">Conversations</h3>
-                  <Button size="sm" onClick={() => { startNewConversation(); setSidebarOpen(false); }}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
+        <main className={`flex-1 ${isMobile ? 'p-4' : 'p-6'}`}>
+          <div className="max-w-6xl mx-auto">
+            {/* Header */}
+            <div className="mb-8">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Crown className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                    Grand Strategist
+                  </h1>
+                  <p className="text-gray-600 text-lg">Your AI-powered strategic advisor and document intelligence assistant</p>
                 </div>
               </div>
               
-              <div className="p-4 space-y-3 overflow-y-auto h-full">
-                {conversations.map(conv => (
-                  <div 
-                    key={conv.id} 
-                    className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                      activeConversation?.id === conv.id 
-                        ? 'bg-gray-100' 
-                        : 'hover:bg-gray-50'
-                    }`}
-                    onClick={() => { setActiveConversation(conv); setSidebarOpen(false); }}
-                  >
-                    <h4 className="font-medium text-sm truncate">{conv.title}</h4>
-                    <p className="text-gray-600 text-xs mt-1 line-clamp-2">{conv.lastMessage}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {!isMobile && (
-          <div className="w-80 border-r bg-white">
-            <div className="p-4 border-b">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium text-gray-900">Conversations</h3>
-                <Button size="sm" onClick={startNewConversation}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            
-            <div className="p-4 space-y-3 overflow-y-auto">
-              {conversations.map(conv => (
-                <div 
-                  key={conv.id} 
-                  className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                    activeConversation?.id === conv.id 
-                      ? 'bg-gray-100' 
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => setActiveConversation(conv)}
-                >
-                  <h4 className="font-medium text-sm truncate">{conv.title}</h4>
-                  <p className="text-gray-600 text-xs mt-1 line-clamp-2">{conv.lastMessage}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
-          {/* Header */}
-          <div className="p-4 border-b bg-white">
-            <div className="flex items-center justify-between">
-              {isMobile && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSidebarOpen(true)}
-                  className="mr-2"
-                >
-                  <Menu className="h-5 w-5" />
-                </Button>
-              )}
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                  <Brain className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <h1 className="font-medium">Grand Strategist</h1>
-                  <p className="text-sm text-gray-600">{documents.length} documents available</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {activeConversation ? (
-            <>
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                {activeConversation.messages.length === 0 && (
-                  <div className="text-center py-12">
-                    <h2 className="text-2xl font-medium mb-2">What can I help with?</h2>
-                    <p className="text-gray-600">I have access to all {documents.length} of your documents</p>
-                  </div>
+              <div className="flex items-center gap-4 mb-6">
+                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                  <Brain className="w-4 h-4 mr-1" />
+                  Azure OpenAI Powered
+                </Badge>
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  <Sparkles className="w-4 h-4 mr-1" />
+                  Strategic Intelligence
+                </Badge>
+                {requestCount > 0 && (
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    <CheckCircle className="w-4 h-4 mr-1" />
+                    {requestCount} Request{requestCount !== 1 ? 's' : ''} Complete
+                  </Badge>
                 )}
+              </div>
+            </div>
 
-                {activeConversation.messages.map((msg) => (
-                  <div key={msg.id} className="flex gap-4">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                      {msg.role === 'user' ? (
-                        <span className="text-sm font-medium">You</span>
-                      ) : (
-                        <Brain className="h-4 w-4" />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="whitespace-pre-wrap text-gray-900 leading-relaxed">
-                        {msg.content}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Input Section */}
+              <Card className="border-purple-200 shadow-xl">
+                <CardHeader className="bg-gradient-to-r from-purple-50 to-blue-50">
+                  <CardTitle className="flex items-center gap-2 text-purple-800">
+                    <Brain className="h-5 w-5" />
+                    Strategic Input
+                  </CardTitle>
+                  <CardDescription>
+                    Describe your challenge, goal, or question for strategic analysis
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div>
+                      <Textarea
+                        placeholder="Enter your strategic question or challenge here. The Grand Strategist will provide comprehensive analysis and actionable recommendations..."
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        rows={8}
+                        className="border-purple-200 focus:border-purple-400 focus:ring-purple-400"
+                      />
+                      <div className="mt-2 text-sm text-gray-500">
+                        {prompt.length}/2000 characters
                       </div>
                     </div>
-                  </div>
-                ))}
 
-                {isLoading && (
-                  <div className="flex gap-4">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                      <Brain className="h-4 w-4" />
+                    <div className="flex gap-3">
+                      <Button 
+                        type="submit" 
+                        disabled={isLoading || !prompt.trim()}
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Strategizing...
+                          </>
+                        ) : (
+                          <>
+                            <Crown className="w-4 h-4 mr-2" />
+                            Consult Grand Strategist
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={clearAll}
+                        className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                      >
+                        Clear
+                      </Button>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </form>
+
+                  {/* Sample Prompts */}
+                  <div className="mt-6">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Sample Strategic Questions:</h4>
+                    <div className="space-y-2">
+                      {samplePrompts.map((sample, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setPrompt(sample)}
+                          className="w-full text-left p-3 text-sm bg-gray-50 hover:bg-purple-50 rounded-lg border border-gray-200 hover:border-purple-200 transition-colors"
+                        >
+                          {sample}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Output Section */}
+              <Card className="border-blue-200 shadow-xl">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <CardTitle className="flex items-center gap-2 text-blue-800">
+                    <Sparkles className="h-5 w-5" />
+                    Strategic Analysis
+                  </CardTitle>
+                  <CardDescription>
+                    Comprehensive insights and actionable recommendations
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  {error && (
+                    <Alert className="mb-6 border-red-200 bg-red-50">
+                      <AlertTriangle className="h-4 w-4 text-red-600" />
+                      <AlertDescription className="text-red-800">
+                        <strong>Strategic Analysis Failed:</strong> {error}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {isLoading && (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="text-center">
+                        <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+                        <p className="text-gray-600">The Grand Strategist is analyzing your request...</p>
+                        <p className="text-sm text-gray-500 mt-2">This may take 10-30 seconds</p>
                       </div>
                     </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
+                  )}
 
-              {/* Input */}
-              <div className="p-4 border-t bg-white">
-                <div className="max-w-3xl mx-auto">
-                  <div className="relative bg-gray-50 rounded-3xl border border-gray-200">
-                    <Textarea
-                      placeholder="Message Grand Strategist..."
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      className="border-0 bg-transparent resize-none focus:ring-0 rounded-3xl px-4 py-3 pr-12"
-                      rows={1}
-                    />
-                    <Button
-                      onClick={sendMessage}
-                      disabled={isLoading || !message.trim()}
-                      size="sm"
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-full w-8 h-8 p-0"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
+                  {response && !isLoading && (
+                    <div className="space-y-4">
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                        <div className="prose prose-blue max-w-none">
+                          <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+                            {response}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigator.clipboard.writeText(response)}
+                          className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                        >
+                          Copy Analysis
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const blob = new Blob([response], { type: 'text/plain' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'grand-strategist-analysis.txt';
+                            a.click();
+                          }}
+                          className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                        >
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {!response && !isLoading && !error && (
+                    <div className="text-center py-12 text-gray-500">
+                      <Crown className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                      <p>Your strategic analysis will appear here</p>
+                      <p className="text-sm mt-2">Enter a question above to get started</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Features Overview */}
+            <Card className="mt-8 border-indigo-200 shadow-xl">
+              <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50">
+                <CardTitle className="text-indigo-800">Grand Strategist Capabilities</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <Brain className="h-8 w-8 text-purple-600 mx-auto mb-3" />
+                    <h3 className="font-semibold text-purple-800 mb-2">Strategic Analysis</h3>
+                    <p className="text-sm text-purple-700">Deep analysis of business challenges with actionable insights</p>
+                  </div>
+                  <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <Sparkles className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+                    <h3 className="font-semibold text-blue-800 mb-2">Content Strategy</h3>
+                    <p className="text-sm text-blue-700">Comprehensive content and communication planning</p>
+                  </div>
+                  <div className="text-center p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                    <Crown className="h-8 w-8 text-indigo-600 mx-auto mb-3" />
+                    <h3 className="font-semibold text-indigo-800 mb-2">Executive Guidance</h3>
+                    <p className="text-sm text-indigo-700">High-level strategic recommendations and frameworks</p>
                   </div>
                 </div>
-              </div>
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <h2 className="text-2xl font-medium mb-2">What can I help with?</h2>
-                <p className="text-gray-600 mb-4">I have access to all {documents.length} of your documents</p>
-                <Button onClick={startNewConversation} className="mt-4">
-                  Start a conversation
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
       </div>
     </div>
   );

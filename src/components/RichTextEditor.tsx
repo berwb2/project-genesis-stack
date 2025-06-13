@@ -106,7 +106,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         processed = processed.replace(/<span[^>]*>/g, '').replace(/<\/span>/g, ''); // Remove spans
         processed = processed.replace(/<div[^>]*>/g, '<p>').replace(/<\/div>/g, '</p>'); // Convert divs to paragraphs
         
-        // Enhance headings
+        // Apply luxury formatting classes immediately
         processed = processed.replace(/<h([1-6])([^>]*)>/g, '<h$1 class="luxury-heading-$1">');
         processed = processed.replace(/<p([^>]*)>/g, '<p class="luxury-paragraph">');
         processed = processed.replace(/<ul([^>]*)>/g, '<ul class="luxury-list-bullet">');
@@ -117,10 +117,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         return processed;
       },
       transformPastedText(text) {
-        // Enhanced plain text paste handling
+        // Enhanced plain text paste handling with immediate luxury formatting
         let formatted = text;
         
-        // Auto-format markdown-style headers
+        // Auto-format markdown-style headers with luxury classes
         formatted = formatted.replace(/^######\s+(.+)$/gm, '<h6 class="luxury-heading-6">$1</h6>');
         formatted = formatted.replace(/^#####\s+(.+)$/gm, '<h5 class="luxury-heading-5">$1</h5>');
         formatted = formatted.replace(/^####\s+(.+)$/gm, '<h4 class="luxury-heading-4">$1</h4>');
@@ -128,13 +128,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         formatted = formatted.replace(/^##\s+(.+)$/gm, '<h2 class="luxury-heading-2">$1</h2>');
         formatted = formatted.replace(/^#\s+(.+)$/gm, '<h1 class="luxury-heading-1">$1</h1>');
         
-        // Auto-format bullet points (multiple styles)
+        // Auto-format bullet points with luxury classes
         formatted = formatted.replace(/^[\*\-\+•]\s+(.+)$/gm, '<li class="luxury-list-item">$1</li>');
         
-        // Auto-format numbered lists
+        // Auto-format numbered lists with luxury classes
         formatted = formatted.replace(/^\d+\.\s+(.+)$/gm, '<li class="luxury-list-item">$1</li>');
         
-        // Wrap consecutive list items in proper list containers
+        // Wrap consecutive list items in proper list containers with luxury classes
         formatted = formatted.replace(/(<li class="luxury-list-item">.*?<\/li>(?:\s*<li class="luxury-list-item">.*?<\/li>)*)/gs, 
           (match) => {
             // Check if this looks like a numbered list (starts with number)
@@ -146,10 +146,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           }
         );
         
-        // Auto-format blockquotes
+        // Auto-format blockquotes with luxury classes
         formatted = formatted.replace(/^>\s+(.+)$/gm, '<blockquote class="luxury-blockquote">$1</blockquote>');
         
-        // Auto-format paragraphs (anything that's not already formatted)
+        // Auto-format paragraphs with luxury classes (anything that's not already formatted)
         formatted = formatted.replace(/^([^<\n#•\-\*\+\d>].+)$/gm, '<p class="luxury-paragraph">$1</p>');
         
         // Handle line breaks and spacing
@@ -163,17 +163,52 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         return formatted;
       },
     },
+    onCreate: ({ editor }) => {
+      // Apply luxury formatting immediately when editor is created
+      applyLuxuryFormatting(editor);
+    },
   });
 
-  // Update editor content when prop changes
+  // Function to apply luxury formatting to existing content
+  const applyLuxuryFormatting = (editorInstance: any) => {
+    if (!editorInstance) return;
+    
+    setTimeout(() => {
+      const currentContent = editorInstance.getHTML();
+      let luxuryContent = currentContent;
+      
+      // Apply luxury classes to existing elements
+      luxuryContent = luxuryContent.replace(/<h1(?![^>]*class=)/g, '<h1 class="luxury-heading-1"');
+      luxuryContent = luxuryContent.replace(/<h2(?![^>]*class=)/g, '<h2 class="luxury-heading-2"');
+      luxuryContent = luxuryContent.replace(/<h3(?![^>]*class=)/g, '<h3 class="luxury-heading-3"');
+      luxuryContent = luxuryContent.replace(/<h4(?![^>]*class=)/g, '<h4 class="luxury-heading-4"');
+      luxuryContent = luxuryContent.replace(/<h5(?![^>]*class=)/g, '<h5 class="luxury-heading-5"');
+      luxuryContent = luxuryContent.replace(/<h6(?![^>]*class=)/g, '<h6 class="luxury-heading-6"');
+      luxuryContent = luxuryContent.replace(/<p(?![^>]*class=)/g, '<p class="luxury-paragraph"');
+      luxuryContent = luxuryContent.replace(/<ul(?![^>]*class=)/g, '<ul class="luxury-list-bullet"');
+      luxuryContent = luxuryContent.replace(/<ol(?![^>]*class=)/g, '<ol class="luxury-list-numbered"');
+      luxuryContent = luxuryContent.replace(/<li(?![^>]*class=)/g, '<li class="luxury-list-item"');
+      luxuryContent = luxuryContent.replace(/<blockquote(?![^>]*class=)/g, '<blockquote class="luxury-blockquote"');
+      
+      if (luxuryContent !== currentContent) {
+        editorInstance.commands.setContent(luxuryContent, false);
+      }
+    }, 100);
+  };
+
+  // Update editor content when prop changes and apply formatting
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content, false);
+      applyLuxuryFormatting(editor);
     }
   }, [editor, content]);
 
+  // Apply formatting when content changes
   useEffect(() => {
     if (editor) {
+      applyLuxuryFormatting(editor);
+      
       const codeBlocks = document.querySelectorAll('pre code');
       codeBlocks.forEach((block) => {
         hljs.highlightElement(block as HTMLElement);
@@ -200,8 +235,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         />
       </div>
       <EditorStylesheet />
+      
+      {/* Enhanced Luxury Editor Styling with Immediate Application */}
       <style>{`
-        /* Luxury Editor Styling */
+        /* Luxury Editor Styling with Enhanced Immediate Application */
         .luxury-editor-content {
           font-family: Georgia, 'Times New Roman', serif !important;
           line-height: 1.8 !important;
@@ -212,6 +249,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           min-height: 400px !important;
         }
         
+        /* Apply styles immediately to all elements */
+        .luxury-editor-content h1,
         .luxury-editor-content .luxury-heading-1 {
           font-size: 2.5rem !important;
           font-weight: 700 !important;
@@ -227,6 +266,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           letter-spacing: -0.02em !important;
         }
         
+        .luxury-editor-content h2,
         .luxury-editor-content .luxury-heading-2 {
           font-size: 2rem !important;
           font-weight: 600 !important;
@@ -237,6 +277,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           padding-left: 1.5rem !important;
         }
         
+        .luxury-editor-content h2:before,
         .luxury-editor-content .luxury-heading-2:before {
           content: '' !important;
           position: absolute !important;
@@ -249,6 +290,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           border-radius: 2px !important;
         }
         
+        .luxury-editor-content h3,
         .luxury-editor-content .luxury-heading-3 {
           font-size: 1.5rem !important;
           font-weight: 600 !important;
@@ -256,6 +298,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           margin: 1.75rem 0 1rem 0 !important;
         }
         
+        .luxury-editor-content h4,
         .luxury-editor-content .luxury-heading-4 {
           font-size: 1.25rem !important;
           font-weight: 600 !important;
@@ -263,6 +306,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           margin: 1.5rem 0 0.75rem 0 !important;
         }
         
+        .luxury-editor-content h5,
         .luxury-editor-content .luxury-heading-5 {
           font-size: 1.125rem !important;
           font-weight: 600 !important;
@@ -270,6 +314,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           margin: 1.25rem 0 0.5rem 0 !important;
         }
         
+        .luxury-editor-content h6,
         .luxury-editor-content .luxury-heading-6 {
           font-size: 1rem !important;
           font-weight: 600 !important;
@@ -279,6 +324,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           letter-spacing: 0.05em !important;
         }
         
+        .luxury-editor-content p,
         .luxury-editor-content .luxury-paragraph {
           margin-bottom: 1.5rem !important;
           font-size: 1.125rem !important;
@@ -288,19 +334,32 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           text-justify: inter-word !important;
         }
         
-        .luxury-editor-content .luxury-list-bullet {
+        /* Apply formatting immediately on creation */
+        .ProseMirror-focused h1:not(.luxury-heading-1) { @apply luxury-heading-1; }
+        .ProseMirror-focused h2:not(.luxury-heading-2) { @apply luxury-heading-2; }
+        .ProseMirror-focused h3:not(.luxury-heading-3) { @apply luxury-heading-3; }
+        .ProseMirror-focused h4:not(.luxury-heading-4) { @apply luxury-heading-4; }
+        .ProseMirror-focused h5:not(.luxury-heading-5) { @apply luxury-heading-5; }
+        .ProseMirror-focused h6:not(.luxury-heading-6) { @apply luxury-heading-6; }
+        .ProseMirror-focused p:not(.luxury-paragraph) { @apply luxury-paragraph; }
+        
+        /* Rest of luxury styles... */
+        .luxury-editor-content .luxury-list-bullet,
+        .luxury-editor-content ul {
           margin: 1.5rem 0 !important;
           padding-left: 2rem !important;
           list-style: none !important;
         }
         
-        .luxury-editor-content .luxury-list-numbered {
+        .luxury-editor-content .luxury-list-numbered,
+        .luxury-editor-content ol {
           margin: 1.5rem 0 !important;
           padding-left: 2rem !important;
           counter-reset: luxury-counter !important;
         }
         
-        .luxury-editor-content .luxury-list-bullet .luxury-list-item {
+        .luxury-editor-content .luxury-list-bullet .luxury-list-item,
+        .luxury-editor-content ul li {
           margin-bottom: 0.75rem !important;
           font-size: 1.125rem !important;
           line-height: 1.7 !important;
@@ -308,7 +367,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           position: relative !important;
         }
         
-        .luxury-editor-content .luxury-list-bullet .luxury-list-item:before {
+        .luxury-editor-content .luxury-list-bullet .luxury-list-item:before,
+        .luxury-editor-content ul li:before {
           content: '●' !important;
           color: #3b82f6 !important;
           font-weight: bold !important;
@@ -316,7 +376,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           left: -1.5rem !important;
         }
         
-        .luxury-editor-content .luxury-list-numbered .luxury-list-item {
+        .luxury-editor-content .luxury-list-numbered .luxury-list-item,
+        .luxury-editor-content ol li {
           margin-bottom: 0.75rem !important;
           font-size: 1.125rem !important;
           line-height: 1.7 !important;
@@ -325,7 +386,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           counter-increment: luxury-counter !important;
         }
         
-        .luxury-editor-content .luxury-list-numbered .luxury-list-item:before {
+        .luxury-editor-content .luxury-list-numbered .luxury-list-item:before,
+        .luxury-editor-content ol li:before {
           content: counter(luxury-counter) '.' !important;
           color: #3b82f6 !important;
           font-weight: bold !important;
@@ -333,7 +395,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           left: -2rem !important;
         }
         
-        .luxury-editor-content .luxury-blockquote {
+        .luxury-editor-content .luxury-blockquote,
+        .luxury-editor-content blockquote {
           border-left: 4px solid #3b82f6 !important;
           padding: 1.5rem 2rem !important;
           margin: 2rem 0 !important;
@@ -345,7 +408,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           position: relative !important;
         }
         
-        .luxury-editor-content .luxury-blockquote:before {
+        .luxury-editor-content .luxury-blockquote:before,
+        .luxury-editor-content blockquote:before {
           content: '"' !important;
           font-size: 4rem !important;
           color: #93c5fd !important;
@@ -355,7 +419,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           font-family: serif !important;
         }
         
-        .luxury-editor-content .luxury-table {
+        .luxury-editor-content .luxury-table,
+        .luxury-editor-content table {
           width: 100% !important;
           border-collapse: collapse !important;
           margin: 2rem 0 !important;
@@ -365,7 +430,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1) !important;
         }
         
-        .luxury-editor-content .luxury-table-header {
+        .luxury-editor-content .luxury-table-header,
+        .luxury-editor-content th {
           background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
           color: white !important;
           padding: 1rem 1.5rem !important;
@@ -377,7 +443,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           hyphens: auto !important;
         }
         
-        .luxury-editor-content .luxury-table-cell {
+        .luxury-editor-content .luxury-table-cell,
+        .luxury-editor-content td {
           padding: 1rem 1.5rem !important;
           border-bottom: 1px solid #e2e8f0 !important;
           color: #475569 !important;
@@ -388,11 +455,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           vertical-align: top !important;
         }
         
-        .luxury-editor-content .luxury-table-row:hover {
+        .luxury-editor-content .luxury-table-row:hover,
+        .luxury-editor-content tr:hover {
           background-color: #f8fafc !important;
         }
         
-        .luxury-editor-content .luxury-link {
+        .luxury-editor-content .luxury-link,
+        .luxury-editor-content a {
           color: #2563eb !important;
           text-decoration: underline !important;
           text-decoration-color: #93c5fd !important;
@@ -400,12 +469,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           transition: all 0.2s ease !important;
         }
         
-        .luxury-editor-content .luxury-link:hover {
+        .luxury-editor-content .luxury-link:hover,
+        .luxury-editor-content a:hover {
           color: #1d4ed8 !important;
           text-decoration-color: #3b82f6 !important;
         }
         
-        .luxury-editor-content .luxury-code-block {
+        .luxury-editor-content .luxury-code-block,
+        .luxury-editor-content pre {
           background: #1e293b !important;
           color: #e2e8f0 !important;
           padding: 1.5rem !important;
@@ -444,29 +515,35 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             font-size: 16px !important;
           }
           
-          .luxury-editor-content .luxury-heading-1 {
+          .luxury-editor-content .luxury-heading-1,
+          .luxury-editor-content h1 {
             font-size: 2rem !important;
             margin: 2rem 0 1rem 0 !important;
           }
           
-          .luxury-editor-content .luxury-heading-2 {
+          .luxury-editor-content .luxury-heading-2,
+          .luxury-editor-content h2 {
             font-size: 1.5rem !important;
             margin: 1.5rem 0 0.75rem 0 !important;
             padding-left: 1rem !important;
           }
           
-          .luxury-editor-content .luxury-paragraph {
+          .luxury-editor-content .luxury-paragraph,
+          .luxury-editor-content p {
             font-size: 1rem !important;
             text-align: left !important;
           }
           
-          .luxury-editor-content .luxury-blockquote {
+          .luxury-editor-content .luxury-blockquote,
+          .luxury-editor-content blockquote {
             padding: 1rem !important;
             margin: 1rem 0 !important;
           }
           
           .luxury-editor-content .luxury-table-header,
-          .luxury-editor-content .luxury-table-cell {
+          .luxury-editor-content .luxury-table-cell,
+          .luxury-editor-content th,
+          .luxury-editor-content td {
             padding: 0.75rem !important;
             font-size: 0.875rem !important;
           }
