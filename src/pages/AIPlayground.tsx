@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
@@ -34,7 +33,7 @@ const AIPlayground = () => {
   });
 
   const ideaGeneration = useIdeaGeneration({
-    onSuccess: (ideas) => setContent(ideas.join('\n\n')),
+    onSuccess: (ideas) => setContent(Array.isArray(ideas) ? ideas.join('\n\n') : ideas),
     onError: (error) => console.error('Idea generation error:', error)
   });
 
