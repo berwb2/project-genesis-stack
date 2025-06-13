@@ -1,0 +1,140 @@
+
+/* Base ProseMirror styles */
+.ProseMirror {
+  @apply outline-none min-h-[20rem] text-base leading-relaxed;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  color: hsl(var(--foreground));
+}
+
+.ProseMirror p {
+  @apply my-4 text-base leading-relaxed;
+}
+
+.ProseMirror h1 {
+  @apply text-3xl font-serif font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent my-6 leading-tight;
+}
+
+.ProseMirror h2 {
+  @apply text-2xl font-serif font-semibold text-blue-600 my-5 leading-snug;
+}
+
+.ProseMirror h3 {
+  @apply text-xl font-serif font-medium text-blue-500 my-4 leading-snug;
+}
+
+.ProseMirror ul {
+  @apply list-disc ml-6 my-4 space-y-2;
+}
+
+.ProseMirror ol {
+  @apply list-decimal ml-6 my-4 space-y-2;
+}
+
+.ProseMirror li {
+  @apply my-1 leading-relaxed;
+}
+
+.ProseMirror code {
+  @apply bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded px-2 py-1 font-mono text-sm;
+}
+
+.ProseMirror pre {
+  @apply bg-gray-900 text-gray-100 rounded-lg p-4 my-6 overflow-x-auto shadow-md;
+}
+
+.ProseMirror pre code {
+  @apply bg-transparent text-inherit p-0;
+}
+
+.ProseMirror blockquote {
+  @apply pl-4 border-l-4 border-blue-400 italic my-6 text-gray-700 dark:text-gray-300 bg-blue-50 dark:bg-blue-950/20 py-2 rounded-r;
+}
+
+/* Table styles */
+.ProseMirror table {
+  @apply border-collapse border border-gray-300 dark:border-gray-600 my-6 w-full;
+}
+
+.ProseMirror th {
+  @apply border border-gray-300 dark:border-gray-600 px-4 py-2 bg-gray-100 dark:bg-gray-800 font-semibold text-left;
+}
+
+.ProseMirror td {
+  @apply border border-gray-300 dark:border-gray-600 px-4 py-2;
+}
+
+/* Enhanced table header styling */
+.ProseMirror th {
+  @apply bg-blue-50 dark:bg-blue-950/30 font-bold text-blue-900 dark:text-blue-100;
+}
+
+.ProseMirror .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(200, 200, 255, 0.4);
+  pointer-events: none;
+}
+
+.ProseMirror .column-resize-handle {
+  @apply absolute right-0 top-0 bottom-0 w-1 bg-blue-400 pointer-events-none;
+}
+
+.ProseMirror.resize-cursor {
+  cursor: ew-resize;
+  cursor: col-resize;
+}
+
+/* Placeholder styles */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  @apply text-gray-400 pointer-events-none float-left h-0;
+}
+
+/* Selection highlight */
+.ProseMirror ::selection {
+  @apply bg-blue-200 dark:bg-blue-800/40;
+}
+
+/* Focus styles */
+.ProseMirror:focus {
+  @apply outline-none;
+}
+
+/* Link styles */
+.ProseMirror a {
+  @apply text-blue-600 hover:text-blue-800 underline underline-offset-2;
+}
+
+/* Strong and emphasis */
+.ProseMirror strong {
+  @apply font-semibold;
+}
+
+.ProseMirror em {
+  @apply italic;
+}
+
+.ProseMirror u {
+  @apply underline;
+}
+
+/* Code block styles */
+.code-block {
+  @apply bg-gray-900 text-gray-100 rounded-lg p-4 my-6 overflow-x-auto border-l-4 border-blue-500 shadow-md;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+}
+
+/* Bubble menu styles */
+.bubble-menu {
+  @apply flex bg-white dark:bg-gray-800 backdrop-blur border rounded-lg shadow-lg p-1;
+}
+
+.bubble-menu button {
+  @apply p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded;
+}
+
+.bubble-menu button.is-active {
+  @apply bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300;
+}
