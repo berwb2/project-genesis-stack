@@ -5,7 +5,11 @@ import { Volume2, VolumeX } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export function SoundToggle() {
-  const { toggleSounds, soundsEnabled } = useSound();
+  const { isEnabled, setIsEnabled } = useSound();
+
+  const toggleSounds = () => {
+    setIsEnabled(!isEnabled);
+  };
 
   return (
     <Tooltip>
@@ -14,9 +18,9 @@ export function SoundToggle() {
           variant="ghost" 
           size="icon" 
           onClick={toggleSounds} 
-          aria-label={soundsEnabled ? "Disable sounds" : "Enable sounds"}
+          aria-label={isEnabled ? "Disable sounds" : "Enable sounds"}
         >
-          {soundsEnabled ? (
+          {isEnabled ? (
             <Volume2 className="h-5 w-5" />
           ) : (
             <VolumeX className="h-5 w-5" />
@@ -24,7 +28,7 @@ export function SoundToggle() {
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>{soundsEnabled ? "Disable sounds" : "Enable sounds"}</p>
+        <p>{isEnabled ? "Disable sounds" : "Enable sounds"}</p>
       </TooltipContent>
     </Tooltip>
   );
