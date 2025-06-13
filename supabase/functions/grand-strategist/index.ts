@@ -1,7 +1,6 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,20 +23,14 @@ serve(async (req) => {
       throw new Error('Prompt is required and cannot be empty');
     }
 
-    // Get Azure OpenAI configuration from environment
-    const azureEndpoint = Deno.env.get('VITE_AZURE_OPENAI_ENDPOINT');
-    const azureApiKey = Deno.env.get('VITE_AZURE_OPENAI_KEY');
-    const azureApiVersion = Deno.env.get('VITE_AZURE_OPENAI_VERSION') || '2024-05-01-preview';
-    const azureModel = Deno.env.get('VITE_AZURE_OPENAI_MODEL') || 'gpt-4o';
-
-    if (!azureEndpoint || !azureApiKey) {
-      throw new Error('Azure OpenAI configuration missing. Please check environment variables.');
+    // Get OpenAI API key from Supabase secrets
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    
+    if (!openaiApiKey) {
+      throw new Error('OpenAI API key not configured. Please contact administrator.');
     }
 
-    // Construct the Azure OpenAI API URL
-    const apiUrl = `${azureEndpoint}/openai/deployments/${azureModel}/chat/completions?api-version=${azureApiVersion}`;
-    
-    console.log(`Calling Azure OpenAI API with model: ${azureModel}`);
+    console.log('Using OpenAI API for Grand Strategist');
 
     // Prepare system message based on document type
     let systemMessage = `You are the Grand Strategist, an expert AI assistant specialized in strategic thinking, document creation, and intelligent analysis. You provide thoughtful, well-structured responses that help users achieve their goals.`;
@@ -51,43 +44,45 @@ serve(async (req) => {
     }
 
     const requestBody = {
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemMessage },
         { role: 'user', content: prompt }
       ],
       max_tokens: 2000,
-      temperature: 0.7,
-      stream: false
+      temperature: 0.7
     };
 
-    const response = await fetch(apiUrl, {
+    console.log('Calling OpenAI API...');
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'api-key': azureApiKey,
+        'Authorization': `Bearer ${openaiApiKey}`,
       },
       body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Azure OpenAI API error: { status: ${response.status}, statusText: ${response.statusText}, error: ${errorText} }`);
+      console.error(`OpenAI API error: { status: ${response.status}, statusText: ${response.statusText}, error: ${errorText} }`);
       
       if (response.status === 401) {
-        throw new Error('Azure OpenAI API authentication failed. Please check your API key.');
+        throw new Error('OpenAI API authentication failed. Please check your API key.');
       } else if (response.status === 429) {
-        throw new Error('Azure OpenAI API rate limit exceeded. Please try again later.');
+        throw new Error('OpenAI API rate limit exceeded. Please try again later.');
       } else if (response.status === 404) {
-        throw new Error('Azure OpenAI deployment not found. Please check your model deployment.');
+        throw new Error('OpenAI model not found. Please check your model configuration.');
       } else {
-        throw new Error(`Azure OpenAI API error: ${response.status} - ${response.statusText}`);
+        throw new Error(`OpenAI API error: ${response.status} - ${response.statusText}`);
       }
     }
 
     const data = await response.json();
     
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      throw new Error('Invalid response format from Azure OpenAI API');
+      throw new Error('Invalid response format from OpenAI API');
     }
 
     const result = data.choices[0].message.content;
@@ -97,7 +92,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({ 
       result,
       usage: data.usage || {},
-      model: azureModel 
+      model: 'gpt-4o-mini'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
