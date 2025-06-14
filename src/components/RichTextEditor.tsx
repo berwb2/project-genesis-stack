@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -172,7 +171,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   // Function to apply luxury formatting to existing content
   const applyLuxuryFormatting = (editorInstance: any) => {
     if (!editorInstance) return;
-    
     setTimeout(() => {
       const currentContent = editorInstance.getHTML();
       let luxuryContent = currentContent;
@@ -193,6 +191,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       if (luxuryContent !== currentContent) {
         editorInstance.commands.setContent(luxuryContent, false);
       }
+      // Add debug log
+      console.debug("[RichTextEditor] Applied luxury formatting after edit mode toggle or content change.");
     }, 100);
   };
 
@@ -204,7 +204,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, [editor, content]);
 
-  // Apply formatting when content changes
+  // Apply formatting whenever content or editor changes
   useEffect(() => {
     if (editor) {
       applyLuxuryFormatting(editor);
@@ -215,6 +215,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       });
     }
   }, [editor, content]);
+
+  // NEW: Ensure formatting is always reapplied when switching to edit mode ("editable" changes)
+  useEffect(() => {
+    if (editor) {
+      applyLuxuryFormatting(editor);
+      console.debug('[RichTextEditor] Forced re-apply of luxury formatting due to editable toggle:', editable);
+    }
+  }, [editor, editable]);
 
   if (!editor) {
     return (

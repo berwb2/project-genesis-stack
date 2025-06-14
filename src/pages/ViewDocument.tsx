@@ -24,7 +24,7 @@ const ViewDocument = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
-  const [showAI, setShowAI] = useState(false);
+  const [showAI, setShowAI] = useState(true); // Always show AI chat on document open by default
   const [aiMessages, setAiMessages] = useState<any[]>([]);
   const [aiInput, setAiInput] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -35,6 +35,7 @@ const ViewDocument = () => {
     if (id) {
       loadDocument();
       initializeAI();
+      setShowAI(true); // Always show AI chat on document open by default
     }
   }, [id]);
 
@@ -134,16 +135,36 @@ User Question: ${userMessage}
         metadata: document.metadata,
       });
 
-      const assistantMessage = { role: 'assistant', content: response.response || response.result || response };
-      const updatedMessages = [...newMessages, assistantMessage];
-      setAiMessages(updatedMessages);
+      // Enhanced error check for response structure and debugging
+      if (response && (response.response || response.result)) {
+        const assistantMessage = { role: 'assistant', content: response.response || response.result };
+        const updatedMessages = [...newMessages, assistantMessage];
+        setAiMessages(updatedMessages);
 
-      // Update AI session with chat history
-      await updateAISession(aiSession.id, {
-        chat_history: updatedMessages
-      });
-    } catch (error) {
-      console.error('Error calling AI:', error);
+        // Update AI session with chat history
+        await updateAISession(aiSession.id, {
+          chat_history: updatedMessages
+        });
+      } else if (response && response.error) {
+        // Show backend error details to help user debug
+        setAiMessages([
+          ...newMessages,
+          {
+            role: 'assistant',
+            content: `AI service error: ${response.error}\n\nRaw details: ${JSON.stringify(response.details || response)}`
+          }
+        ]);
+      } else {
+        setAiMessages([
+          ...newMessages,
+          {
+            role: 'assistant',
+            content: `Unexpected AI response format: ${JSON.stringify(response)}`
+          }
+        ]);
+      }
+    } catch (error: any) {
+      console.error('[AI CALL ERROR]', error);
       setAiMessages([...newMessages, { 
         role: 'assistant', 
         content: 'I apologize, but I encountered an error. Please check your AI configuration and try again.' 
