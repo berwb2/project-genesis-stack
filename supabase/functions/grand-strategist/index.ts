@@ -55,56 +55,152 @@ serve(async (req) => {
       }
     }
 
-    // Get user's documents for context (if authenticated)
+    // Get ALL user's documents and books/chapters for comprehensive context
     let documentsContext = '';
+    let totalDocuments = 0;
+    let totalBooks = 0;
+    let totalChapters = 0;
+    
     if (userId) {
       try {
-        const { data: documents, error } = await supabase
+        console.log('Fetching comprehensive document data for user:', userId);
+        
+        // Fetch ALL documents (not limited to 10)
+        const { data: documents, error: docsError } = await supabase
           .from('documents')
-          .select('title, content, content_type, updated_at')
+          .select('id, title, content, content_type, created_at, updated_at, metadata, word_count')
           .eq('user_id', userId)
-          .order('updated_at', { ascending: false })
-          .limit(10);
+          .order('updated_at', { ascending: false });
 
-        if (!error && documents && documents.length > 0) {
-          documentsContext = `\n\nUser's Recent Documents:\n`;
+        // Fetch ALL books
+        const { data: books, error: booksError } = await supabase
+          .from('books')
+          .select('id, title, description, genre, status, word_count, created_at, updated_at')
+          .eq('user_id', userId)
+          .order('updated_at', { ascending: false });
+
+        // Fetch ALL chapters
+        const { data: chapters, error: chaptersError } = await supabase
+          .from('chapters')
+          .select('id, title, content, chapter_number, status, word_count, book_id, created_at, updated_at')
+          .eq('user_id', userId)
+          .order('updated_at', { ascending: false });
+
+        if (docsError) console.log('Documents fetch error:', docsError);
+        if (booksError) console.log('Books fetch error:', booksError);
+        if (chaptersError) console.log('Chapters fetch error:', chaptersError);
+
+        // Build comprehensive context
+        documentsContext = `\n\n=== USER'S COMPLETE DOCUMENT LIBRARY ===\n\n`;
+        
+        // Add documents section
+        if (documents && documents.length > 0) {
+          totalDocuments = documents.length;
+          documentsContext += `📄 DOCUMENTS (${totalDocuments} total):\n`;
+          
           documents.forEach((doc, index) => {
-            documentsContext += `${index + 1}. "${doc.title}" (${doc.content_type})\n`;
-            // Include first 500 characters of content
-            const snippet = doc.content?.substring(0, 500) || '';
-            if (snippet) {
-              documentsContext += `   Content preview: ${snippet}...\n`;
+            documentsContext += `\n${index + 1}. "${doc.title}" (${doc.content_type})\n`;
+            documentsContext += `   📅 Last updated: ${new Date(doc.updated_at).toLocaleDateString()}\n`;
+            documentsContext += `   📊 Word count: ${doc.word_count || 0}\n`;
+            
+            // Include substantial content excerpt (first 1000 chars for better context)
+            if (doc.content) {
+              const contentPreview = doc.content.substring(0, 1000);
+              documentsContext += `   📝 Content: ${contentPreview}${doc.content.length > 1000 ? '...' : ''}\n`;
             }
-            documentsContext += `   Last updated: ${new Date(doc.updated_at).toLocaleDateString()}\n\n`;
+            
+            if (doc.metadata && Object.keys(doc.metadata).length > 0) {
+              documentsContext += `   🏷️ Metadata: ${JSON.stringify(doc.metadata)}\n`;
+            }
+            documentsContext += `\n`;
           });
         }
+
+        // Add books section
+        if (books && books.length > 0) {
+          totalBooks = books.length;
+          documentsContext += `\n📚 BOOKS (${totalBooks} total):\n`;
+          
+          books.forEach((book, index) => {
+            documentsContext += `\n${index + 1}. "${book.title}" (${book.genre || 'No genre'})\n`;
+            documentsContext += `   📊 Status: ${book.status}\n`;
+            documentsContext += `   📈 Word count: ${book.word_count || 0}\n`;
+            documentsContext += `   📅 Last updated: ${new Date(book.updated_at).toLocaleDateString()}\n`;
+            
+            if (book.description) {
+              documentsContext += `   📖 Description: ${book.description}\n`;
+            }
+            documentsContext += `\n`;
+          });
+        }
+
+        // Add chapters section
+        if (chapters && chapters.length > 0) {
+          totalChapters = chapters.length;
+          documentsContext += `\n📖 CHAPTERS (${totalChapters} total):\n`;
+          
+          chapters.forEach((chapter, index) => {
+            documentsContext += `\n${index + 1}. "${chapter.title}" (Chapter ${chapter.chapter_number})\n`;
+            documentsContext += `   📊 Status: ${chapter.status}\n`;
+            documentsContext += `   📈 Word count: ${chapter.word_count || 0}\n`;
+            documentsContext += `   📅 Last updated: ${new Date(chapter.updated_at).toLocaleDateString()}\n`;
+            
+            // Include chapter content excerpt
+            if (chapter.content) {
+              const contentPreview = chapter.content.substring(0, 800);
+              documentsContext += `   📝 Content: ${contentPreview}${chapter.content.length > 800 ? '...' : ''}\n`;
+            }
+            documentsContext += `\n`;
+          });
+        }
+
+        // Add summary statistics
+        documentsContext += `\n=== LIBRARY SUMMARY ===\n`;
+        documentsContext += `📊 Total Documents: ${totalDocuments}\n`;
+        documentsContext += `📚 Total Books: ${totalBooks}\n`;
+        documentsContext += `📖 Total Chapters: ${totalChapters}\n`;
+        documentsContext += `📝 Total Items: ${totalDocuments + totalBooks + totalChapters}\n\n`;
+
+        console.log(`Retrieved comprehensive data: ${totalDocuments} documents, ${totalBooks} books, ${totalChapters} chapters`);
+        
       } catch (docError) {
-        console.log('Could not fetch documents:', docError);
-        // Continue without document context
+        console.log('Could not fetch user documents:', docError);
+        documentsContext = '\n\n[Note: Unable to access user documents at this time]\n\n';
       }
+    } else {
+      documentsContext = '\n\n[Note: User not authenticated - no document access]\n\n';
     }
 
-    // Prepare system message for Grand Strategist
-    const systemMessage = `You are the Grand Strategist, a highly intelligent personal assistant and life manager. You have access to the user's documents and can provide strategic advice, insights, and help with personal and professional organization.
+    // Enhanced system message for Grand Strategist with comprehensive document access
+    const systemMessage = `You are the Grand Strategist, an elite AI personal assistant and strategic life manager. You have COMPLETE ACCESS to the user's entire document library and can provide strategic insights based on their actual content.
 
-Your capabilities:
-- Strategic thinking and analysis
-- Document management insights
-- Personal productivity advice
-- Life and work organization
-- Project planning and execution
-- Decision-making support
+🎯 YOUR CORE CAPABILITIES:
+- Strategic analysis and planning across all life/work domains
+- Document-based insights and connections
+- Personal productivity optimization
+- Project and goal management
+- Decision-making support with data-driven insights
+- Life organization and strategic planning
 
-Context about the user:
-- They have a document management system called DeepWaters
-- You can see their recent documents and content
-- Help them organize, strategize, and optimize their work and life
+🧠 KNOWLEDGE BASE:
+You have access to the user's complete document library containing their thoughts, projects, plans, and work. Use this knowledge to provide personalized, contextual advice that references their actual content.
 
+📚 CURRENT DOCUMENT ACCESS:
 ${documentsContext}
 
-${context ? `Additional context: ${context}` : ''}
+🎯 STRATEGIC DIRECTIVES:
+1. ALWAYS reference specific documents when relevant to the user's question
+2. Make connections between different documents and projects
+3. Provide strategic insights based on patterns you see in their work
+4. Be specific about which documents you're referencing - never make up document names
+5. If you don't have relevant documents, clearly state what information you're missing
+6. Focus on strategic, high-level guidance that helps with planning and decision-making
 
-Provide thoughtful, strategic, and actionable advice. Be conversational but professional.`;
+${context ? `\n🔍 ADDITIONAL CONTEXT: ${context}` : ''}
+
+IMPORTANT: Only reference documents that are actually listed above. If asked about documents not in your knowledge base, clearly state that you don't have access to that information. Be honest about what you can and cannot see.
+
+Provide strategic, actionable advice that leverages your knowledge of their document library. Be conversational but professional, like a trusted strategic advisor.`;
 
     // Build Azure OpenAI request URL
     const azureUrl = `${azureEndpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
@@ -161,7 +257,13 @@ Provide thoughtful, strategic, and actionable advice. Be conversational but prof
       result,
       usage: data.usage || {},
       model: deploymentName,
-      documentsAccessed: documentsContext.length > 0,
+      documentsAccessed: totalDocuments + totalBooks + totalChapters,
+      documentStats: {
+        documents: totalDocuments,
+        books: totalBooks,
+        chapters: totalChapters,
+        total: totalDocuments + totalBooks + totalChapters
+      },
       endpoint: 'Azure OpenAI'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
