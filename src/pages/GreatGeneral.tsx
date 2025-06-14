@@ -1,13 +1,13 @@
 
 import React from 'react';
 import Layout from '@/components/ui/layout';
-import GrandStrategistAssistant from '@/components/GrandStrategistAssistant';
+import GreatGeneralAssistant from '@/components/GreatGeneralAssistant';
 
 const GreatGeneral = () => {
   return (
     <Layout>
       <div className="h-[calc(100vh-140px)]">
-        <GrandStrategistAssistant />
+        <GreatGeneralAssistant />
       </div>
     </Layout>
   );
