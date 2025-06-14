@@ -23,20 +23,30 @@ serve(async (req) => {
       throw new Error('Prompt is required and cannot be empty');
     }
 
-    // Get Azure OpenAI configuration from environment
-    const azureEndpoint = Deno.env.get('VITE_AZURE_OPENAI_ENDPOINT');
-    const azureApiKey = Deno.env.get('VITE_AZURE_OPENAI_KEY');
-    const azureApiVersion = Deno.env.get('VITE_AZURE_OPENAI_VERSION') || '2024-05-01-preview';
-    const azureModel = Deno.env.get('VITE_AZURE_OPENAI_MODEL') || 'gpt-4o';
+    // Get Azure OpenAI configuration from environment - using the correct variable names
+    const azureEndpoint = Deno.env.get('AZURE_OPENAI_ENDPOINT') || Deno.env.get('VITE_AZURE_OPENAI_ENDPOINT');
+    const azureApiKey = Deno.env.get('AZURE_OPENAI_API_KEY') || Deno.env.get('VITE_AZURE_OPENAI_KEY');
+    const azureApiVersion = Deno.env.get('AZURE_OPENAI_API_VERSION') || Deno.env.get('VITE_AZURE_OPENAI_VERSION') || '2024-05-01-preview';
+    const azureModel = Deno.env.get('AZURE_OPENAI_DEPLOYMENT_NAME') || Deno.env.get('VITE_AZURE_OPENAI_MODEL') || 'gpt-4o';
+
+    console.log('Azure OpenAI Configuration Check:', {
+      hasEndpoint: !!azureEndpoint,
+      hasApiKey: !!azureApiKey,
+      endpoint: azureEndpoint?.substring(0, 50) + '...',
+      model: azureModel,
+      apiVersion: azureApiVersion
+    });
 
     if (!azureEndpoint || !azureApiKey) {
       throw new Error('Azure OpenAI configuration missing. Please check environment variables.');
     }
 
-    // Construct the Azure OpenAI API URL
-    const apiUrl = `${azureEndpoint}openai/deployments/${azureModel}/chat/completions?api-version=${azureApiVersion}`;
+    // Construct the Azure OpenAI API URL - ensuring proper format
+    const cleanEndpoint = azureEndpoint.endsWith('/') ? azureEndpoint.slice(0, -1) : azureEndpoint;
+    const apiUrl = `${cleanEndpoint}/openai/deployments/${azureModel}/chat/completions?api-version=${azureApiVersion}`;
     
     console.log(`Calling Azure OpenAI API with model: ${azureModel}`);
+    console.log(`API URL: ${apiUrl}`);
 
     // Prepare system message based on document type
     let systemMessage = `You are the Grand Strategist, an expert AI assistant specialized in strategic thinking, document creation, and intelligent analysis. You provide thoughtful, well-structured responses that help users achieve their goals.`;
@@ -70,6 +80,8 @@ serve(async (req) => {
       body: JSON.stringify(requestBody),
     });
 
+    console.log(`Azure OpenAI Response Status: ${response.status}`);
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Azure OpenAI API error: { status: ${response.status}, statusText: ${response.statusText}, error: ${errorText} }`);
@@ -79,9 +91,9 @@ serve(async (req) => {
       } else if (response.status === 429) {
         throw new Error('Azure OpenAI API rate limit exceeded. Please try again later.');
       } else if (response.status === 404) {
-        throw new Error('Azure OpenAI deployment not found. Please check your model deployment.');
+        throw new Error('Azure OpenAI deployment not found. Please check your model deployment name.');
       } else {
-        throw new Error(`Azure OpenAI API error: ${response.status} - ${response.statusText}`);
+        throw new Error(`Azure OpenAI API error: ${response.status} - ${response.statusText}: ${errorText}`);
       }
     }
 
@@ -94,6 +106,7 @@ serve(async (req) => {
     const result = data.choices[0].message.content;
     
     console.log(`Grand Strategist response generated successfully (${result.length} characters)`);
+    console.log('Usage stats:', data.usage || {});
 
     return new Response(JSON.stringify({ 
       result,
