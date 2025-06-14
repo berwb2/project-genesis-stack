@@ -24,11 +24,11 @@ serve(async (req) => {
       throw new Error('Prompt is required and cannot be empty');
     }
 
-    // Azure OpenAI Configuration - using your specific endpoint
+    // Azure OpenAI Configuration - using your specific credentials
     const azureEndpoint = 'https://azure-openai-testhypoth-1.openai.azure.com';
-    const azureApiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1ZHFzdWRxdnltenJzZmt0eHNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwNjQ4MDgsImV4cCI6MjA2MjY0MDgwOH0.Dq1nvmNzUJJdAxzehQs2OVrPtHZhc-XRoPkuFp8FwSc'; // Your provided key
+    const azureApiKey = '2BLjtvECQMqaSdRlDZgjnpGHGHX23WNCmkUlDn3fktOnryTNov4BJQQJ99BFACL93NaXJ3w3AAABACOGKe9X';
     const apiVersion = '2024-05-01-preview';
-    const deploymentName = 'gpt-4o'; // Assuming this is your deployment name
+    const deploymentName = 'gpt-4o'; // Your deployment name
 
     console.log('Using Azure OpenAI endpoint:', azureEndpoint);
 
@@ -106,7 +106,7 @@ ${context ? `Additional context: ${context}` : ''}
 
 Provide thoughtful, strategic, and actionable advice. Be conversational but professional.`;
 
-    // Build Azure OpenAI request
+    // Build Azure OpenAI request URL
     const azureUrl = `${azureEndpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
     
     const requestBody = {
@@ -125,7 +125,7 @@ Provide thoughtful, strategic, and actionable advice. Be conversational but prof
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'api-key': azureApiKey, // Azure uses api-key header, not Authorization Bearer
+        'api-key': azureApiKey, // Azure uses api-key header
       },
       body: JSON.stringify(requestBody),
     });
