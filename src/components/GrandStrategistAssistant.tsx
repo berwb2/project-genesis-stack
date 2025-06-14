@@ -1,25 +1,20 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Loader2, XCircle } from 'lucide-react';
+import { Send, Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { callGrandStrategist, getAISession, createAISession, updateAISession } from '@/lib/api';
+import AIResponseRenderer from './AIResponseRenderer';
 
 interface AIAssistantProps {
   context?: string;
   documentId?: string;
   documentTitle?: string;
-  messages?: any[];
-  onSend?: (message: string) => void;
-  inputValue?: string;
   onInputChange?: (value: string) => void;
-  isLoading?: boolean;
   className?: string;
   onResultSelect?: (result: string) => void;
   variant?: 'default' | 'document';
@@ -29,32 +24,27 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
   context = '',
   documentId,
   documentTitle,
-  messages: initialMessages = [],
-  onSend,
-  inputValue: initialInputValue = '',
   onInputChange,
-  isLoading = false,
   className = '',
   onResultSelect,
-  variant = 'default'
 }) => {
-  const [messages, setMessages] = useState<any[]>(initialMessages);
-  const [input, setInput] = useState(initialInputValue);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [input, setInput] = useState('');
   const [aiSession, setAiSession] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
 
-  // Initialize AI session on mount
   useEffect(() => {
     const initializeAI = async () => {
+      setIsLoading(true);
       try {
-        let session = await getAISession('default', 'document');
+        const sessionId = documentId || 'general';
+        let session = await getAISession(sessionId, 'document');
         if (!session) {
-          session = await createAISession('default', 'document');
+          session = await createAISession(sessionId, 'document');
         }
         setAiSession(session);
         
-        // Safely handle chat_history with proper type checking
         const chatHistory = session.chat_history;
         if (Array.isArray(chatHistory)) {
           setMessages(chatHistory);
@@ -63,19 +53,15 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
         }
       } catch (error) {
         console.error('Error initializing AI:', error);
+        toast.error('Failed to initialize AI assistant.');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     initializeAI();
-  }, []);
+  }, [documentId]);
 
-  // Update local state when props change
-  useEffect(() => {
-    setMessages(initialMessages);
-    setInput(initialInputValue);
-  }, [initialMessages, initialInputValue]);
-
-  // Scroll to bottom on new messages
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -93,41 +79,37 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
   };
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
-    setInput('');
-    onInputChange?.('');
-
     const newMessages = [...messages, { role: 'user', content: userMessage }];
     setMessages(newMessages);
+    setInput('');
+    onInputChange?.('');
+    setIsLoading(true);
 
     try {
-      const doc = {
-        id: documentId || 'general',
-        title: documentTitle || 'General Conversation',
-        content: context,
-        type: 'document' as const
-      };
+      const richContext = `
+Document Context:
+Title: "${documentTitle || 'General Conversation'}"
+Content: ${context ? context.substring(0, 4000) : "[No content]"}
+`;
       
-      // Call AI with the merged context and user input as message
-      const response = await callGrandStrategist(doc, userMessage);
+      const response = await callGrandStrategist(richContext, userMessage);
 
-      // Enhanced error check for response structure and debugging
       if (response && (response.response || response.result)) {
-        const assistantMessage = { role: 'assistant', content: response.response || response.result };
+        const assistantMessageContent = response.response || response.result;
+        const assistantMessage = { role: 'assistant', content: assistantMessageContent };
         const updatedMessages = [...newMessages, assistantMessage];
         setMessages(updatedMessages);
 
-        // Update AI session with chat history
-        await updateAISession(aiSession.id, {
-          chat_history: updatedMessages
-        });
-
-        // If a result selection handler is provided, call it with the AI response
-        onResultSelect?.(response.response || response.result);
+        if (aiSession) {
+          await updateAISession(aiSession.id, {
+            chat_history: updatedMessages
+          });
+        }
+        onResultSelect?.(assistantMessageContent);
       } else if (response && response.error) {
-        // Show backend error details to help user debug
         setMessages([
           ...newMessages,
           {
@@ -150,6 +132,8 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
         role: 'assistant', 
         content: 'I apologize, but I encountered an error. Please check your AI configuration and try again.' 
       }]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -161,59 +145,63 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
   };
 
   return (
-    <Card className={cn("w-full rounded-lg shadow-md border-gray-100", className)}>
-      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-        <CardTitle className="text-lg font-medium">
-          Grand Strategist
-        </CardTitle>
-        <div className="text-sm text-muted-foreground">
-          Intelligent Writing Assistant
-        </div>
-      </CardHeader>
-      <CardContent className="pl-2 pr-2 pb-2 pt-0 h-[400px] flex flex-col">
-        <div ref={chatContainerRef} className="flex-1 overflow-y-auto mb-2">
+    <Card className={cn("w-full h-full rounded-lg shadow-md flex flex-col bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-gray-200 dark:border-gray-700", className)}>
+      <CardContent className="p-2 h-full flex flex-col">
+        <div ref={chatContainerRef} className="flex-1 overflow-y-auto mb-2 space-y-4 p-2">
           {messages.map((message, index) => (
-            <div key={index} className={`mb-3 flex items-start ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div key={index} className={`flex items-start gap-3 w-full ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {message.role === 'assistant' && (
-                <Avatar className="mr-3 h-8 w-8">
+                <Avatar className="h-8 w-8 flex-shrink-0">
                   <AvatarImage src="/logo.png" alt="AI Avatar" />
-                  <AvatarFallback>AI</AvatarFallback>
+                  <AvatarFallback>GS</AvatarFallback>
                 </Avatar>
               )}
-              <div className={`rounded-xl px-4 py-2 max-w-[75%] ${message.role === 'user' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
-                <p className="text-sm break-words">{message.content}</p>
+              <div className={`rounded-xl px-4 py-2 max-w-[85%] text-sm ${message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'}`}>
+                {message.role === 'assistant' ? (
+                  <AIResponseRenderer content={message.content} />
+                ) : (
+                  <p className="break-words">{message.content}</p>
+                )}
               </div>
+               {message.role === 'user' && (
+                <Avatar className="h-8 w-8 flex-shrink-0">
+                  <AvatarImage src="https://github.com/shadcn.png" alt="User Avatar" />
+                  <AvatarFallback>You</AvatarFallback>
+                </Avatar>
+              )}
             </div>
           ))}
-          {isLoading && (
-            <div className="mb-3 flex items-start justify-start">
-              <Avatar className="mr-3 h-8 w-8">
+          {isLoading && !messages.some(m => m.role === 'assistant' && m.content.includes('Thinking')) && (
+            <div className="flex items-start gap-3 justify-start">
+              <Avatar className="h-8 w-8 flex-shrink-0">
                 <AvatarImage src="/logo.png" alt="AI Avatar" />
-                <AvatarFallback>AI</AvatarFallback>
+                <AvatarFallback>GS</AvatarFallback>
               </Avatar>
-              <div className="rounded-xl px-4 py-2 max-w-[75%] bg-gray-100 text-gray-800">
-                <p className="text-sm"><Loader2 className="h-4 w-4 animate-spin mr-1 inline-block" /> Thinking...</p>
+              <div className="rounded-xl px-4 py-2 max-w-[85%] bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                <p className="text-sm flex items-center"><Loader2 className="h-4 w-4 animate-spin mr-2" /> Thinking...</p>
               </div>
             </div>
           )}
         </div>
-        <div className="mt-auto">
-          <div className="flex rounded-md shadow-sm">
+        <div className="mt-auto pt-2 border-t border-gray-200 dark:border-gray-700">
+          <div className="relative">
             <Input
               type="text"
-              placeholder="Ask Grand Strategist..."
+              placeholder="Ask anything..."
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              className="rounded-r-none border-gray-200 focus:border-blue-500"
+              className="w-full rounded-full py-6 pl-5 pr-14 bg-gray-100 dark:bg-gray-800 border-transparent focus-visible:ring-2 focus-visible:ring-blue-500"
               disabled={isLoading}
             />
             <Button
               onClick={handleSend}
-              className="rounded-l-none bg-blue-500 hover:bg-blue-600 text-white"
-              disabled={isLoading}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full w-10 h-10 p-0 bg-blue-500 hover:bg-blue-600 text-white"
+              disabled={isLoading || !input.trim()}
+              size="icon"
             >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+              <span className="sr-only">Send</span>
             </Button>
           </div>
         </div>

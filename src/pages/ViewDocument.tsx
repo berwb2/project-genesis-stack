@@ -8,7 +8,7 @@ import RichTextEditor from '@/components/RichTextEditor';
 import DocumentRenderer from '@/components/DocumentRenderer';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
-import { getDocument, updateDocument, callGrandStrategist, getAISession, createAISession, updateAISession } from '@/lib/api';
+import { getDocument, updateDocument } from '@/lib/api';
 import { DOCUMENT_TYPES } from '@/types/documentTypes';
 import { ArrowLeft, Edit, Calendar, Clock, MessageSquare, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
@@ -26,16 +26,11 @@ const ViewDocument = () => {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [showAI, setShowAI] = useState(true); // Always show AI chat on document open by default
-  const [aiMessages, setAiMessages] = useState<any[]>([]);
-  const [aiInput, setAiInput] = useState('');
-  const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiSession, setAiSession] = useState<any>(null);
   const [tocOpen, setTocOpen] = useState(!isMobile);
 
   useEffect(() => {
     if (id) {
       loadDocument();
-      initializeAI();
       setShowAI(true); // Always show AI chat on document open by default
     }
   }, [id]);
@@ -55,28 +50,6 @@ const ViewDocument = () => {
       navigate('/documents');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const initializeAI = async () => {
-    if (!id) return;
-    
-    try {
-      let session = await getAISession(id, 'document');
-      if (!session) {
-        session = await createAISession(id, 'document');
-      }
-      setAiSession(session);
-      
-      // Safely handle chat_history with proper type checking
-      const chatHistory = session.chat_history;
-      if (Array.isArray(chatHistory)) {
-        setAiMessages(chatHistory);
-      } else {
-        setAiMessages([]);
-      }
-    } catch (error) {
-      console.error('Error initializing AI:', error);
     }
   };
 
@@ -100,78 +73,6 @@ const ViewDocument = () => {
       toast.error('Failed to save document');
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleAiQuestion = async () => {
-    if (!aiInput.trim() || !document || !aiSession) return;
-
-    const userMessage = aiInput.trim();
-    setAiInput('');
-    setIsAiLoading(true);
-
-    const newMessages = [...aiMessages, { role: 'user', content: userMessage }];
-    setAiMessages(newMessages);
-
-    try {
-      // Compose full context for this document
-      const context = `
-Document Context:
-Title: "${document.title}"
-Type: ${document.content_type}
-Created: ${document.created_at}
-Updated: ${document.updated_at}
-Metadata: ${document.metadata ? JSON.stringify(document.metadata) : "{}"}
-Content (first 2000 chars): ${document.content ? document.content.substring(0,2000) : "[No content]"}
----
-User Question: ${userMessage}
-`;
-
-      // Call AI with the merged context and user input as message
-      const response = await callGrandStrategist(context, {
-        id: document.id,
-        title: document.title,
-        content: document.content,
-        type: document.content_type ?? 'document',
-        metadata: document.metadata,
-      });
-
-      // Enhanced error check for response structure and debugging
-      if (response && (response.response || response.result)) {
-        const assistantMessage = { role: 'assistant', content: response.response || response.result };
-        const updatedMessages = [...newMessages, assistantMessage];
-        setAiMessages(updatedMessages);
-
-        // Update AI session with chat history
-        await updateAISession(aiSession.id, {
-          chat_history: updatedMessages
-        });
-      } else if (response && response.error) {
-        // Show backend error details to help user debug
-        setAiMessages([
-          ...newMessages,
-          {
-            role: 'assistant',
-            content: `AI service error: ${response.error}\n\nRaw details: ${JSON.stringify(response.details || response)}`
-          }
-        ]);
-      } else {
-        setAiMessages([
-          ...newMessages,
-          {
-            role: 'assistant',
-            content: `Unexpected AI response format: ${JSON.stringify(response)}`
-          }
-        ]);
-      }
-    } catch (error: any) {
-      console.error('[AI CALL ERROR]', error);
-      setAiMessages([...newMessages, { 
-        role: 'assistant', 
-        content: 'I apologize, but I encountered an error. Please check your AI configuration and try again.' 
-      }]);
-    } finally {
-      setIsAiLoading(false);
     }
   };
 
@@ -437,12 +338,9 @@ User Question: ${userMessage}
                 <div className="lg:col-span-3">
                   <GrandStrategistAssistant
                     context={content}
-                    messages={aiMessages}
-                    onSend={handleAiQuestion}
-                    inputValue={aiInput}
-                    onInputChange={setAiInput}
-                    isLoading={isAiLoading}
-                    className="sticky top-6 h-[600px] flex flex-col shadow-xl border-purple-200"
+                    documentId={id}
+                    documentTitle={title}
+                    className="sticky top-6 h-[600px] flex flex-col shadow-xl"
                     variant="document"
                   />
                 </div>
