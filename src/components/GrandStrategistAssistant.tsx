@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,10 +38,10 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
     const initializeAI = async () => {
       setIsLoading(true);
       try {
-        const sessionId = documentId || 'general';
-        let session = await getAISession(sessionId, 'document');
+        const assistantId = 'grand-strategist';
+        let session = await getAISession(documentId || null, 'document', assistantId);
         if (!session) {
-          session = await createAISession(sessionId, 'document');
+          session = await createAISession(documentId || null, 'document', assistantId);
         }
         setAiSession(session);
         
@@ -95,7 +94,9 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
         title: documentTitle || 'General Conversation',
         content: context || '',
         type: 'document' as const,
-        metadata: {}
+        metadata: {
+          assistant: 'grand-strategist'
+        }
       };
       
       const response = await callGrandStrategist(userMessage, documentPayload);
@@ -214,4 +215,3 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
 };
 
 export default GrandStrategistAssistant;
-
