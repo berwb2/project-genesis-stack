@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,8 @@ import { callGrandStrategist, getAISession, createAISession, updateAISession } f
 
 interface AIAssistantProps {
   context?: string;
+  documentId?: string;
+  documentTitle?: string;
   messages?: any[];
   onSend?: (message: string) => void;
   inputValue?: string;
@@ -24,6 +27,8 @@ interface AIAssistantProps {
 
 const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
   context = '',
+  documentId,
+  documentTitle,
   messages: initialMessages = [],
   onSend,
   inputValue: initialInputValue = '',
@@ -43,9 +48,9 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
   useEffect(() => {
     const initializeAI = async () => {
       try {
-        let session = await getAISession('default', 'assistant');
+        let session = await getAISession('default', 'document');
         if (!session) {
-          session = await createAISession('default', 'assistant');
+          session = await createAISession('default', 'document');
         }
         setAiSession(session);
         
@@ -98,8 +103,15 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
     setMessages(newMessages);
 
     try {
+      const doc = {
+        id: documentId || 'general',
+        title: documentTitle || 'General Conversation',
+        content: context,
+        type: 'document' as const
+      };
+      
       // Call AI with the merged context and user input as message
-      const response = await callGrandStrategist(context, userMessage);
+      const response = await callGrandStrategist(doc, userMessage);
 
       // Enhanced error check for response structure and debugging
       if (response && (response.response || response.result)) {

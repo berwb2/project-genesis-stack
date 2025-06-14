@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { cn } from "@/lib/utils"
 
 interface AIAssistantSidebarProps {
-  context?: string;
+  document?: any;
   messages?: { role: 'user' | 'assistant'; content: string }[];
   onSend?: (message: string) => void;
   inputValue?: string;
@@ -23,7 +24,7 @@ interface AIAssistantSidebarProps {
 }
 
 const GrandStrategistAssistantSidebar: React.FC<AIAssistantSidebarProps> = ({
-  context = '',
+  document,
   messages: initialMessages = [],
   onSend,
   inputValue: initialInputValue = '',
