@@ -24,13 +24,13 @@ serve(async (req) => {
       throw new Error('Prompt is required and cannot be empty');
     }
 
-    // Get OpenAI API key (we'll use standard OpenAI for now)
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    // Azure OpenAI Configuration - using your specific endpoint
+    const azureEndpoint = 'https://azure-openai-testhypoth-1.openai.azure.com';
+    const azureApiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1ZHFzdWRxdnltenJzZmt0eHNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwNjQ4MDgsImV4cCI6MjA2MjY0MDgwOH0.Dq1nvmNzUJJdAxzehQs2OVrPtHZhc-XRoPkuFp8FwSc'; // Your provided key
+    const apiVersion = '2024-05-01-preview';
+    const deploymentName = 'gpt-4o'; // Assuming this is your deployment name
 
-    if (!openaiApiKey) {
-      console.error('OpenAI API key not found');
-      throw new Error('OpenAI API key not configured. Please add OPENAI_API_KEY to your Supabase secrets.');
-    }
+    console.log('Using Azure OpenAI endpoint:', azureEndpoint);
 
     // Initialize Supabase client to access user's documents
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -42,39 +42,49 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get authorization header
+    // Get authorization header for user context
     const authHeader = req.headers.get('Authorization');
+    let userId = null;
+    
     if (authHeader) {
-      supabase.auth.setAuth(authHeader.replace('Bearer ', ''));
-    }
-
-    // Get user's documents for context
-    let documentsContext = '';
-    try {
-      const { data: documents, error } = await supabase
-        .from('documents')
-        .select('title, content, content_type, updated_at')
-        .order('updated_at', { ascending: false })
-        .limit(10);
-
-      if (!error && documents && documents.length > 0) {
-        documentsContext = `\n\nUser's Recent Documents:\n`;
-        documents.forEach((doc, index) => {
-          documentsContext += `${index + 1}. "${doc.title}" (${doc.content_type})\n`;
-          // Include first 500 characters of content
-          const snippet = doc.content?.substring(0, 500) || '';
-          if (snippet) {
-            documentsContext += `   Content preview: ${snippet}...\n`;
-          }
-          documentsContext += `   Last updated: ${new Date(doc.updated_at).toLocaleDateString()}\n\n`;
-        });
+      try {
+        const { data: { user } } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+        userId = user?.id;
+      } catch (authError) {
+        console.log('Auth check failed, proceeding without user context:', authError);
       }
-    } catch (docError) {
-      console.log('Could not fetch documents:', docError);
-      // Continue without document context
     }
 
-    // Prepare system message
+    // Get user's documents for context (if authenticated)
+    let documentsContext = '';
+    if (userId) {
+      try {
+        const { data: documents, error } = await supabase
+          .from('documents')
+          .select('title, content, content_type, updated_at')
+          .eq('user_id', userId)
+          .order('updated_at', { ascending: false })
+          .limit(10);
+
+        if (!error && documents && documents.length > 0) {
+          documentsContext = `\n\nUser's Recent Documents:\n`;
+          documents.forEach((doc, index) => {
+            documentsContext += `${index + 1}. "${doc.title}" (${doc.content_type})\n`;
+            // Include first 500 characters of content
+            const snippet = doc.content?.substring(0, 500) || '';
+            if (snippet) {
+              documentsContext += `   Content preview: ${snippet}...\n`;
+            }
+            documentsContext += `   Last updated: ${new Date(doc.updated_at).toLocaleDateString()}\n\n`;
+          });
+        }
+      } catch (docError) {
+        console.log('Could not fetch documents:', docError);
+        // Continue without document context
+      }
+    }
+
+    // Prepare system message for Grand Strategist
     const systemMessage = `You are the Grand Strategist, a highly intelligent personal assistant and life manager. You have access to the user's documents and can provide strategic advice, insights, and help with personal and professional organization.
 
 Your capabilities:
@@ -96,8 +106,10 @@ ${context ? `Additional context: ${context}` : ''}
 
 Provide thoughtful, strategic, and actionable advice. Be conversational but professional.`;
 
+    // Build Azure OpenAI request
+    const azureUrl = `${azureEndpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
+    
     const requestBody = {
-      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemMessage },
         { role: 'user', content: prompt }
@@ -107,36 +119,38 @@ Provide thoughtful, strategic, and actionable advice. Be conversational but prof
       stream: false
     };
 
-    console.log('Calling OpenAI API...');
+    console.log('Calling Azure OpenAI API...');
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(azureUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiApiKey}`,
+        'api-key': azureApiKey, // Azure uses api-key header, not Authorization Bearer
       },
       body: JSON.stringify(requestBody),
     });
 
-    console.log(`OpenAI Response Status: ${response.status}`);
+    console.log(`Azure OpenAI Response Status: ${response.status}`);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`OpenAI API error: ${response.status} - ${errorText}`);
+      console.error(`Azure OpenAI API error: ${response.status} - ${errorText}`);
       
       if (response.status === 401) {
-        throw new Error('OpenAI API authentication failed. Please check your API key.');
+        throw new Error('Azure OpenAI API authentication failed. Please check your API key and endpoint.');
       } else if (response.status === 429) {
-        throw new Error('OpenAI API rate limit exceeded. Please try again later.');
+        throw new Error('Azure OpenAI API rate limit exceeded. Please try again later.');
+      } else if (response.status === 404) {
+        throw new Error(`Azure OpenAI deployment '${deploymentName}' not found. Please check your deployment name.`);
       } else {
-        throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+        throw new Error(`Azure OpenAI API error: ${response.status} - ${errorText}`);
       }
     }
 
     const data = await response.json();
     
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      throw new Error('Invalid response format from OpenAI API');
+      throw new Error('Invalid response format from Azure OpenAI API');
     }
 
     const result = data.choices[0].message.content;
@@ -146,8 +160,9 @@ Provide thoughtful, strategic, and actionable advice. Be conversational but prof
     return new Response(JSON.stringify({ 
       result,
       usage: data.usage || {},
-      model: 'gpt-4o-mini',
-      documentsAccessed: documentsContext.length > 0
+      model: deploymentName,
+      documentsAccessed: documentsContext.length > 0,
+      endpoint: 'Azure OpenAI'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
