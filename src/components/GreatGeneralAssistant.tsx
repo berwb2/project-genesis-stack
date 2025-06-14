@@ -1,14 +1,15 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Loader2, Upload, FileText, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 import { callGrandStrategist, getAISession, createAISession, updateAISession } from '@/lib/api';
-import AIResponseRenderer from './AIResponseRenderer';
+import ChatMessage from './chat/ChatMessage';
+import FileUploadArea from './chat/FileUploadArea';
+import ChatInput from './chat/ChatInput';
+import ChatWelcome from './chat/ChatWelcome';
 
 interface GreatGeneralAssistantProps {
   context?: string;
@@ -39,7 +40,6 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const initializeAI = async () => {
@@ -98,11 +98,6 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
       };
       reader.readAsText(file);
     });
-
-    // Reset the input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
   const removeFile = (index: number) => {
@@ -143,7 +138,6 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
         metadata: { uploadedFiles: uploadedFiles.map(f => ({ name: f.name, type: f.type })) }
       };
       
-      // Use the message with file contents for the AI call
       const response = await callGrandStrategist(messageWithFiles, documentPayload);
 
       if (response && (response.response || response.result)) {
@@ -183,15 +177,7 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
       }]);
     } finally {
       setIsLoading(false);
-      // Clear uploaded files after sending
       setUploadedFiles([]);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
     }
   };
 
@@ -212,65 +198,27 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
           </div>
         </div>
 
-        {/* File Upload Area */}
-        {uploadedFiles.length > 0 && (
-          <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Uploaded Files:</h4>
-            <div className="flex flex-wrap gap-2">
-              {uploadedFiles.map((file, index) => (
-                <div key={index} className="flex items-center gap-2 bg-blue-100 dark:bg-blue-900 px-3 py-1 rounded-full text-sm">
-                  <FileText className="h-3 w-3" />
-                  <span className="truncate max-w-[150px]">{file.name}</span>
-                  <button
-                    onClick={() => removeFile(index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <FileUploadArea uploadedFiles={uploadedFiles} onRemoveFile={removeFile} />
 
         {/* Chat Messages */}
         <div ref={chatContainerRef} className="flex-1 overflow-y-auto mb-2 space-y-4 p-2">
           {messages.length === 0 && (
-            <div className="text-center text-gray-500 dark:text-gray-400 mt-8">
-              <div className="mb-4">
-                <Avatar className="h-16 w-16 mx-auto mb-3">
-                  <AvatarImage src="/logo.png" alt="Great General" />
-                  <AvatarFallback className="bg-red-100 text-red-600 text-lg">GG</AvatarFallback>
-                </Avatar>
-                <h3 className="text-lg font-semibold">Welcome to the Great General</h3>
-                <p className="text-sm">Your military strategy and tactics expert. Upload documents and ask questions about warfare, leadership, and strategic planning.</p>
-              </div>
-            </div>
+            <ChatWelcome
+              title="Welcome to the Great General"
+              description="Your military strategy and tactics expert. Upload documents and ask questions about warfare, leadership, and strategic planning."
+              fallback="GG"
+            />
           )}
           
           {messages.map((message, index) => (
-            <div key={index} className={`flex items-start gap-3 w-full ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              {message.role === 'assistant' && (
-                <Avatar className="h-8 w-8 flex-shrink-0">
-                  <AvatarImage src="/logo.png" alt="Great General" />
-                  <AvatarFallback className="bg-red-100 text-red-600">GG</AvatarFallback>
-                </Avatar>
-              )}
-              <div className={`rounded-xl px-4 py-2 max-w-[85%] text-sm ${message.role === 'user' ? 'bg-red-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'}`}>
-                {message.role === 'assistant' ? (
-                  <AIResponseRenderer content={message.content} />
-                ) : (
-                  <p className="break-words">{message.content}</p>
-                )}
-              </div>
-               {message.role === 'user' && (
-                <Avatar className="h-8 w-8 flex-shrink-0">
-                  <AvatarImage src="https://github.com/shadcn.png" alt="User Avatar" />
-                  <AvatarFallback>You</AvatarFallback>
-                </Avatar>
-              )}
-            </div>
+            <ChatMessage
+              key={index}
+              message={message}
+              assistantName="Great General"
+              assistantFallback="GG"
+            />
           ))}
+          
           {isLoading && (
             <div className="flex items-start gap-3 justify-start">
               <Avatar className="h-8 w-8 flex-shrink-0">
@@ -284,49 +232,14 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
           )}
         </div>
 
-        {/* Input Area */}
-        <div className="mt-auto pt-2 border-t border-gray-200 dark:border-gray-700">
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Ask about military strategy, tactics, or upload documents..."
-              value={input}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              className="w-full rounded-full py-6 pl-5 pr-20 bg-gray-100 dark:bg-gray-800 border-transparent focus-visible:ring-2 focus-visible:ring-red-500"
-              disabled={isLoading}
-            />
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept=".txt,.md,.pdf,.doc,.docx"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                className="rounded-full w-10 h-10 p-0 bg-gray-500 hover:bg-gray-600 text-white"
-                disabled={isLoading}
-                size="icon"
-                type="button"
-              >
-                <Upload className="h-4 w-4" />
-                <span className="sr-only">Upload files</span>
-              </Button>
-              <Button
-                onClick={handleSend}
-                className="rounded-full w-10 h-10 p-0 bg-red-500 hover:bg-red-600 text-white"
-                disabled={isLoading || !input.trim()}
-                size="icon"
-              >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-                <span className="sr-only">Send</span>
-              </Button>
-            </div>
-          </div>
-        </div>
+        <ChatInput
+          input={input}
+          isLoading={isLoading}
+          onInputChange={handleInputChange}
+          onSend={handleSend}
+          onFileUpload={handleFileUpload}
+          placeholder="Ask about military strategy, tactics, or upload documents..."
+        />
       </CardContent>
     </Card>
   );

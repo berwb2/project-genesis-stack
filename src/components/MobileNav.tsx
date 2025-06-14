@@ -13,7 +13,8 @@ import {
   Brain,
   Calendar as CalendarIcon,
   Settings,
-  Sparkles
+  Sparkles,
+  Shield
 } from 'lucide-react';
 
 const MobileNav = () => {
@@ -29,6 +30,7 @@ const MobileNav = () => {
     { path: '/books', icon: BookOpen, label: 'Books' },
     { path: '/book-writer', icon: Edit3, label: 'Book Writer' },
     { path: '/grand-strategist', icon: Brain, label: 'Grand Strategist' },
+    { path: '/great-general', icon: Shield, label: 'Great General' },
     { path: '/ai-playground', icon: Sparkles, label: 'AI Playground' },
     { path: '/calendar', icon: CalendarIcon, label: 'Calendar' },
     { path: '/account', icon: Settings, label: 'Settings' },
