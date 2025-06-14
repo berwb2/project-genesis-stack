@@ -1,14 +1,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 import { callGrandStrategist, getAISession, createAISession, updateAISession } from '@/lib/api';
-import AIResponseRenderer from './AIResponseRenderer';
+import ChatMessage from './chat/ChatMessage';
+import ChatInput from './chat/ChatInput';
+import ChatWelcome from './chat/ChatWelcome';
+import ChatLoadingIndicator from './chat/ChatLoadingIndicator';
 
 interface AIAssistantProps {
   context?: string;
@@ -140,75 +139,49 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
       setIsLoading(false);
     }
   };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+  
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    toast.info("File upload is not currently supported by the Grand Strategist.");
   };
 
   return (
     <Card className={cn("w-full h-full rounded-lg shadow-md flex flex-col bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-gray-200 dark:border-gray-700", className)}>
       <CardContent className="p-2 h-full flex flex-col">
         <div ref={chatContainerRef} className="flex-1 overflow-y-auto mb-2 space-y-4 p-2">
-          {messages.map((message, index) => (
-            <div key={index} className={`flex items-start gap-3 w-full ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              {message.role === 'assistant' && (
-                <Avatar className="h-8 w-8 flex-shrink-0">
-                  <AvatarImage src="/logo.png" alt="AI Avatar" />
-                  <AvatarFallback>GS</AvatarFallback>
-                </Avatar>
-              )}
-              <div className={`rounded-xl px-4 py-2 max-w-[85%] text-sm ${message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'}`}>
-                {message.role === 'assistant' ? (
-                  <AIResponseRenderer content={message.content} />
-                ) : (
-                  <p className="break-words">{message.content}</p>
-                )}
-              </div>
-               {message.role === 'user' && (
-                <Avatar className="h-8 w-8 flex-shrink-0">
-                  <AvatarImage src="https://github.com/shadcn.png" alt="User Avatar" />
-                  <AvatarFallback>You</AvatarFallback>
-                </Avatar>
-              )}
-            </div>
-          ))}
-          {isLoading && !messages.some(m => m.role === 'assistant' && m.content.includes('Thinking')) && (
-            <div className="flex items-start gap-3 justify-start">
-              <Avatar className="h-8 w-8 flex-shrink-0">
-                <AvatarImage src="/logo.png" alt="AI Avatar" />
-                <AvatarFallback>GS</AvatarFallback>
-              </Avatar>
-              <div className="rounded-xl px-4 py-2 max-w-[85%] bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                <p className="text-sm flex items-center"><Loader2 className="h-4 w-4 animate-spin mr-2" /> Thinking...</p>
-              </div>
-            </div>
+          {messages.length === 0 && !isLoading ? (
+            <ChatWelcome
+              title="Grand Strategist Assistant"
+              description="Your personal assistant for high-level strategy and planning."
+              avatar="/logo.png"
+              fallback="GS"
+            />
+          ) : (
+            messages.map((message, index) => (
+              <ChatMessage
+                key={index}
+                message={message}
+                assistantName="Grand Strategist"
+                assistantAvatar="/logo.png"
+                assistantFallback="GS"
+              />
+            ))
+          )}
+          {isLoading && (
+             <ChatLoadingIndicator
+              avatarSrc="/logo.png"
+              avatarFallback="GS"
+              text="Thinking..."
+            />
           )}
         </div>
-        <div className="mt-auto pt-2 border-t border-gray-200 dark:border-gray-700">
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Ask anything..."
-              value={input}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              className="w-full rounded-full py-6 pl-5 pr-14 bg-gray-100 dark:bg-gray-800 border-transparent focus-visible:ring-2 focus-visible:ring-blue-500"
-              disabled={isLoading}
-            />
-            <Button
-              onClick={handleSend}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full w-10 h-10 p-0 bg-blue-500 hover:bg-blue-600 text-white"
-              disabled={isLoading || !input.trim()}
-              size="icon"
-            >
-              {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-              <span className="sr-only">Send</span>
-            </Button>
-          </div>
-        </div>
+        <ChatInput
+          input={input}
+          isLoading={isLoading}
+          onInputChange={handleInputChange}
+          onSend={handleSend}
+          onFileUpload={handleFileUpload}
+          placeholder="Ask the Grand Strategist..."
+        />
       </CardContent>
     </Card>
   );
