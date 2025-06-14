@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -96,7 +95,7 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
         type: 'document' as const,
       };
       
-      const response = await callGrandStrategist(JSON.stringify(documentPayload), userMessage);
+      const response = await callGrandStrategist(documentPayload, userMessage);
 
       if (response && (response.response || response.result)) {
         const assistantMessageContent = response.response || response.result;
