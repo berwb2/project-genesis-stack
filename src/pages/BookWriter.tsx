@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
-import AIAssistantSidebar from '@/components/AIAssistantSidebar';
+import GrandStrategistAssistantSidebar from '@/components/GrandStrategistAssistantSidebar';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -552,7 +552,7 @@ const BookWriter = () => {
         </main>
         
         {showAISidebar && (
-          <AIAssistantSidebar 
+          <GrandStrategistAssistantSidebar 
             document={getChapterDocument()}
             className="fixed right-0 top-16 h-[calc(100vh-4rem)] shadow-lg z-40"
             onClose={() => setShowAISidebar(false)}
