@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -45,11 +44,10 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
     const initializeAI = async () => {
       setIsLoading(true);
       try {
-        // Generate a proper UUID for the Great General session if no documentId is provided
-        const sessionId = documentId || crypto.randomUUID();
-        let session = await getAISession(sessionId, 'document');
+        const assistantId = 'great-general';
+        let session = await getAISession(documentId || null, 'document', assistantId);
         if (!session) {
-          session = await createAISession(sessionId, 'document');
+          session = await createAISession(documentId || null, 'document', assistantId);
         }
         setAiSession(session);
         
@@ -117,15 +115,6 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
 
     const userMessage = input.trim();
     
-    // Include file contents in the message if files are uploaded
-    let messageWithFiles = userMessage;
-    if (uploadedFiles.length > 0) {
-      const fileContents = uploadedFiles.map(file => 
-        `\n\n--- File: ${file.name} ---\n${file.content}\n--- End of ${file.name} ---`
-      ).join('');
-      messageWithFiles += fileContents;
-    }
-
     const newMessages = [...messages, { role: 'user', content: userMessage }];
     setMessages(newMessages);
     setInput('');
@@ -134,7 +123,7 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
 
     try {
       // Create a military strategy context for the Great General
-      const militaryContext = `You are the Great General, a military strategy and tactics expert. Focus on:
+      const militaryContext = `You are the Great General, a military strategy and tactics expert. Format your response using markdown. Focus on:
 - Military strategy and tactical analysis
 - Leadership in warfare and combat situations  
 - Historical military campaigns and lessons
@@ -148,18 +137,31 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
 
 Provide insights with the authority and wisdom of history's greatest military minds.`;
 
-      const documentPayload = {
-        id: documentId || crypto.randomUUID(),
-        title: documentTitle || 'Great General Military Consultation',
-        content: `${militaryContext}\n\n${context || ''}`,
-        type: 'document' as const,
-        metadata: { 
-          uploadedFiles: uploadedFiles.map(f => ({ name: f.name, type: f.type })),
-          assistant: 'great-general'
-        }
-      };
+      let messageToSend = userMessage;
+      if (uploadedFiles.length > 0) {
+        const fileContents = uploadedFiles.map(file => 
+          `\n\n--- File: ${file.name} ---\n${file.content}\n--- End of ${file.name} ---`
+        ).join('');
+        messageToSend += fileContents;
+      }
+
+      let documentPayload;
+      if (documentId) {
+        documentPayload = {
+          id: documentId,
+          title: documentTitle || 'Great General Military Consultation',
+          content: `${militaryContext}\n\n${context || ''}`,
+          type: 'document' as const,
+          metadata: { 
+            uploadedFiles: uploadedFiles.map(f => ({ name: f.name, type: f.type })),
+            assistant: 'great-general'
+          }
+        };
+      } else {
+        messageToSend = `${militaryContext}\n\n${messageToSend}`;
+      }
       
-      const response = await callGrandStrategist(messageWithFiles, documentPayload);
+      const response = await callGrandStrategist(messageToSend, documentPayload);
 
       console.log('Great General response:', response);
 

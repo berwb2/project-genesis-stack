@@ -522,7 +522,7 @@ export const callGrandStrategist = async (prompt: string, documentContext?: { id
 };
 
 // AI Session Management
-export const createAISession = async (documentId: string, documentType: 'document' | 'chapter') => {
+export const createAISession = async (documentId: string | null, documentType: 'document' | 'chapter', assistantIdentifier: string) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
@@ -530,13 +530,16 @@ export const createAISession = async (documentId: string, documentType: 'documen
     user_id: user.id,
     session_type: documentType,
     chat_history: [],
-    is_active: true
+    is_active: true,
+    assistant_identifier: assistantIdentifier,
   };
 
-  if (documentType === 'document') {
-    sessionData.document_id = documentId;
-  } else {
-    sessionData.chapter_id = documentId;
+  if (documentId) {
+    if (documentType === 'document') {
+      sessionData.document_id = documentId;
+    } else {
+      sessionData.chapter_id = documentId;
+    }
   }
 
   const { data, error } = await supabase
@@ -553,20 +556,28 @@ export const createAISession = async (documentId: string, documentType: 'documen
   return data;
 };
 
-export const getAISession = async (documentId: string, documentType: 'document' | 'chapter') => {
+export const getAISession = async (documentId: string | null, documentType: 'document' | 'chapter', assistantIdentifier: string) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('ai_sessions')
     .select('*')
     .eq('user_id', user.id)
-    .eq(documentType === 'document' ? 'document_id' : 'chapter_id', documentId)
     .eq('session_type', documentType)
     .eq('is_active', true)
+    .eq('assistant_identifier', assistantIdentifier)
     .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
+
+  const idColumn = documentType === 'document' ? 'document_id' : 'chapter_id';
+  if (documentId) {
+    query = query.eq(idColumn, documentId);
+  } else {
+    query = query.is(idColumn, null);
+  }
+
+  const { data, error } = await query.maybeSingle();
 
   if (error) {
     console.error('Error fetching AI session:', error);
