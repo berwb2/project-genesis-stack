@@ -45,7 +45,8 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
     const initializeAI = async () => {
       setIsLoading(true);
       try {
-        const sessionId = documentId || 'great-general';
+        // Generate a proper UUID for the Great General session if no documentId is provided
+        const sessionId = documentId || crypto.randomUUID();
         let session = await getAISession(sessionId, 'document');
         if (!session) {
           session = await createAISession(sessionId, 'document');
@@ -60,7 +61,9 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
         }
       } catch (error) {
         console.error('Error initializing AI:', error);
-        toast.error('Failed to initialize Great General assistant.');
+        // Don't show error for session initialization - just start fresh
+        setMessages([]);
+        setAiSession(null);
       } finally {
         setIsLoading(false);
       }
@@ -130,19 +133,38 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
     setIsLoading(true);
 
     try {
+      // Create a military strategy context for the Great General
+      const militaryContext = `You are the Great General, a military strategy and tactics expert. Focus on:
+- Military strategy and tactical analysis
+- Leadership in warfare and combat situations  
+- Historical military campaigns and lessons
+- Strategic planning and operational execution
+- Battlefield tactics and maneuver warfare
+- Military logistics and supply chains
+- Command and control structures
+- Intelligence and reconnaissance
+- Military technology and weapons systems
+- Geopolitical military considerations
+
+Provide insights with the authority and wisdom of history's greatest military minds.`;
+
       const documentPayload = {
-        id: documentId || 'great-general',
-        title: documentTitle || 'Great General Conversation',
-        content: context || '',
+        id: documentId || crypto.randomUUID(),
+        title: documentTitle || 'Great General Military Consultation',
+        content: `${militaryContext}\n\n${context || ''}`,
         type: 'document' as const,
-        metadata: { uploadedFiles: uploadedFiles.map(f => ({ name: f.name, type: f.type })) }
+        metadata: { 
+          uploadedFiles: uploadedFiles.map(f => ({ name: f.name, type: f.type })),
+          assistant: 'great-general'
+        }
       };
       
       const response = await callGrandStrategist(messageWithFiles, documentPayload);
 
-      if (response && (response.response || response.result)) {
-        const assistantMessageContent = response.response || response.result;
-        const assistantMessage = { role: 'assistant', content: assistantMessageContent };
+      console.log('Great General response:', response);
+
+      if (response && response.result) {
+        const assistantMessage = { role: 'assistant', content: response.result };
         const updatedMessages = [...newMessages, assistantMessage];
         setMessages(updatedMessages);
 
@@ -151,29 +173,22 @@ const GreatGeneralAssistant: React.FC<GreatGeneralAssistantProps> = ({
             chat_history: updatedMessages
           });
         }
-        onResultSelect?.(assistantMessageContent);
-      } else if (response && response.error) {
-        setMessages([
-          ...newMessages,
-          {
-            role: 'assistant',
-            content: `AI service error: ${response.error}\n\nRaw details: ${JSON.stringify(response.details || response)}`
-          }
-        ]);
+        onResultSelect?.(response.result);
       } else {
+        console.error('Unexpected response format:', response);
         setMessages([
           ...newMessages,
           {
             role: 'assistant',
-            content: `Unexpected AI response format: ${JSON.stringify(response)}`
+            content: 'I apologize, General. There seems to be a communication issue with command. Please try your request again.'
           }
         ]);
       }
     } catch (error: any) {
-      console.error('[AI CALL ERROR]', error);
+      console.error('[GREAT GENERAL ERROR]', error);
       setMessages([...newMessages, { 
         role: 'assistant', 
-        content: 'I apologize, but I encountered an error. Please check your AI configuration and try again.' 
+        content: 'My apologies, General. I encountered a tactical error and need to regroup. Please check the communication lines and try again.' 
       }]);
     } finally {
       setIsLoading(false);
