@@ -1,6 +1,7 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,50 +17,87 @@ serve(async (req) => {
   try {
     const { prompt, context, documentType } = await req.json();
     
-    console.log(`Grand Strategist called with: { promptLength: ${prompt?.length || 0}, hasContext: ${!!context}, documentType: ${documentType || 'unknown'} }`);
+    console.log('Grand Strategist called with prompt:', prompt?.substring(0, 100));
     
     // Validate input
     if (!prompt || prompt.trim().length === 0) {
       throw new Error('Prompt is required and cannot be empty');
     }
 
-    // Get Azure OpenAI configuration from environment - using the correct variable names
-    const azureEndpoint = Deno.env.get('AZURE_OPENAI_ENDPOINT') || Deno.env.get('VITE_AZURE_OPENAI_ENDPOINT');
-    const azureApiKey = Deno.env.get('AZURE_OPENAI_API_KEY') || Deno.env.get('VITE_AZURE_OPENAI_KEY');
-    const azureApiVersion = Deno.env.get('AZURE_OPENAI_API_VERSION') || Deno.env.get('VITE_AZURE_OPENAI_VERSION') || '2024-05-01-preview';
-    const azureModel = Deno.env.get('AZURE_OPENAI_DEPLOYMENT_NAME') || Deno.env.get('VITE_AZURE_OPENAI_MODEL') || 'gpt-4o';
+    // Get OpenAI API key (we'll use standard OpenAI for now)
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
 
-    console.log('Azure OpenAI Configuration Check:', {
-      hasEndpoint: !!azureEndpoint,
-      hasApiKey: !!azureApiKey,
-      endpoint: azureEndpoint?.substring(0, 50) + '...',
-      model: azureModel,
-      apiVersion: azureApiVersion
-    });
-
-    if (!azureEndpoint || !azureApiKey) {
-      throw new Error('Azure OpenAI configuration missing. Please check environment variables.');
+    if (!openaiApiKey) {
+      console.error('OpenAI API key not found');
+      throw new Error('OpenAI API key not configured. Please add OPENAI_API_KEY to your Supabase secrets.');
     }
 
-    // Construct the Azure OpenAI API URL - ensuring proper format
-    const cleanEndpoint = azureEndpoint.endsWith('/') ? azureEndpoint.slice(0, -1) : azureEndpoint;
-    const apiUrl = `${cleanEndpoint}/openai/deployments/${azureModel}/chat/completions?api-version=${azureApiVersion}`;
+    // Initialize Supabase client to access user's documents
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
     
-    console.log(`Calling Azure OpenAI API with model: ${azureModel}`);
-    console.log(`API URL: ${apiUrl}`);
-
-    // Prepare system message based on document type
-    let systemMessage = `You are the Grand Strategist, an expert AI assistant specialized in strategic thinking, document creation, and intelligent analysis. You provide thoughtful, well-structured responses that help users achieve their goals.`;
-    
-    if (documentType) {
-      systemMessage += ` You are currently helping with a ${documentType} document.`;
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Supabase configuration missing');
     }
 
-    if (context) {
-      systemMessage += ` Consider this context: ${context}`;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Get authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (authHeader) {
+      supabase.auth.setAuth(authHeader.replace('Bearer ', ''));
     }
+
+    // Get user's documents for context
+    let documentsContext = '';
+    try {
+      const { data: documents, error } = await supabase
+        .from('documents')
+        .select('title, content, content_type, updated_at')
+        .order('updated_at', { ascending: false })
+        .limit(10);
+
+      if (!error && documents && documents.length > 0) {
+        documentsContext = `\n\nUser's Recent Documents:\n`;
+        documents.forEach((doc, index) => {
+          documentsContext += `${index + 1}. "${doc.title}" (${doc.content_type})\n`;
+          // Include first 500 characters of content
+          const snippet = doc.content?.substring(0, 500) || '';
+          if (snippet) {
+            documentsContext += `   Content preview: ${snippet}...\n`;
+          }
+          documentsContext += `   Last updated: ${new Date(doc.updated_at).toLocaleDateString()}\n\n`;
+        });
+      }
+    } catch (docError) {
+      console.log('Could not fetch documents:', docError);
+      // Continue without document context
+    }
+
+    // Prepare system message
+    const systemMessage = `You are the Grand Strategist, a highly intelligent personal assistant and life manager. You have access to the user's documents and can provide strategic advice, insights, and help with personal and professional organization.
+
+Your capabilities:
+- Strategic thinking and analysis
+- Document management insights
+- Personal productivity advice
+- Life and work organization
+- Project planning and execution
+- Decision-making support
+
+Context about the user:
+- They have a document management system called DeepWaters
+- You can see their recent documents and content
+- Help them organize, strategize, and optimize their work and life
+
+${documentsContext}
+
+${context ? `Additional context: ${context}` : ''}
+
+Provide thoughtful, strategic, and actionable advice. Be conversational but professional.`;
 
     const requestBody = {
+      model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemMessage },
         { role: 'user', content: prompt }
@@ -69,49 +107,47 @@ serve(async (req) => {
       stream: false
     };
 
-    console.log('Calling Azure OpenAI API...');
+    console.log('Calling OpenAI API...');
 
-    const response = await fetch(apiUrl, {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'api-key': azureApiKey,
+        'Authorization': `Bearer ${openaiApiKey}`,
       },
       body: JSON.stringify(requestBody),
     });
 
-    console.log(`Azure OpenAI Response Status: ${response.status}`);
+    console.log(`OpenAI Response Status: ${response.status}`);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Azure OpenAI API error: { status: ${response.status}, statusText: ${response.statusText}, error: ${errorText} }`);
+      console.error(`OpenAI API error: ${response.status} - ${errorText}`);
       
       if (response.status === 401) {
-        throw new Error('Azure OpenAI API authentication failed. Please check your API key.');
+        throw new Error('OpenAI API authentication failed. Please check your API key.');
       } else if (response.status === 429) {
-        throw new Error('Azure OpenAI API rate limit exceeded. Please try again later.');
-      } else if (response.status === 404) {
-        throw new Error('Azure OpenAI deployment not found. Please check your model deployment name.');
+        throw new Error('OpenAI API rate limit exceeded. Please try again later.');
       } else {
-        throw new Error(`Azure OpenAI API error: ${response.status} - ${response.statusText}: ${errorText}`);
+        throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
       }
     }
 
     const data = await response.json();
     
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      throw new Error('Invalid response format from Azure OpenAI API');
+      throw new Error('Invalid response format from OpenAI API');
     }
 
     const result = data.choices[0].message.content;
     
     console.log(`Grand Strategist response generated successfully (${result.length} characters)`);
-    console.log('Usage stats:', data.usage || {});
 
     return new Response(JSON.stringify({ 
       result,
       usage: data.usage || {},
-      model: azureModel 
+      model: 'gpt-4o-mini',
+      documentsAccessed: documentsContext.length > 0
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
