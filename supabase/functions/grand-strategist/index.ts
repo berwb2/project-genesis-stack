@@ -48,8 +48,13 @@ serve(async (req) => {
       documentsContext = `\n\n[USER NOT AUTHENTICATED: Unable to access documents without valid authentication]\n\n`;
     }
 
+    // Ensure context is a string
+    const contextString = typeof context === 'object' && context !== null 
+      ? JSON.stringify(context) 
+      : String(context || '');
+
     // Build system message and generate response
-    const systemMessage = aiService.buildSystemMessage(documentsContext, context);
+    const systemMessage = aiService.buildSystemMessage(documentsContext, contextString);
     const data = await aiService.generateResponse(prompt, systemMessage);
     
     const result = data.choices[0].message.content;
