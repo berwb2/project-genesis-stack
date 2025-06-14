@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -88,8 +89,15 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
     setIsLoading(true);
 
     try {
-      const contextString = context || '';
-      const response = await callGrandStrategist(contextString, userMessage);
+      const documentPayload = {
+        id: documentId || 'general',
+        title: documentTitle || 'General Conversation',
+        content: context || '',
+        type: 'document' as const,
+        metadata: {}
+      };
+      
+      const response = await callGrandStrategist(documentPayload, userMessage);
 
       if (response && (response.response || response.result)) {
         const assistantMessageContent = response.response || response.result;
