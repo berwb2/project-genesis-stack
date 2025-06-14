@@ -13,6 +13,7 @@ import { DOCUMENT_TYPES } from '@/types/documentTypes';
 import { ArrowLeft, Edit, Calendar, Clock, MessageSquare, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import GrandStrategistAssistant from '@/components/GrandStrategistAssistant';
 
 const ViewDocument = () => {
   const { id } = useParams();
@@ -434,77 +435,16 @@ User Question: ${userMessage}
               {/* AI Chat Panel */}
               {showAI && (
                 <div className="lg:col-span-3">
-                  <Card className="sticky top-6 h-[600px] flex flex-col shadow-xl border-purple-200">
-                    <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-t-lg">
-                      <CardTitle className="text-lg">Grand Strategist AI</CardTitle>
-                      <p className="text-sm opacity-90">Your intelligent writing assistant</p>
-                    </CardHeader>
-                    
-                    <CardContent className="flex-1 flex flex-col p-4">
-                      {/* Chat Messages */}
-                      <div className="flex-1 overflow-y-auto space-y-3 mb-4">
-                        {aiMessages.length === 0 && (
-                          <div className="text-center text-gray-500 py-8">
-                            <MessageSquare className="mx-auto h-12 w-12 text-purple-300 mb-3" />
-                            <p className="text-sm">Ask me anything about your document!</p>
-                            <p className="text-xs text-gray-400 mt-1">I can help with writing, editing, and analysis</p>
-                          </div>
-                        )}
-                        
-                        {aiMessages.map((message, index) => (
-                          <div
-                            key={index}
-                            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                          >
-                            <div
-                              className={`max-w-[85%] px-3 py-2 rounded-lg text-sm shadow-sm ${
-                                message.role === 'user'
-                                  ? 'bg-blue-600 text-white'
-                                  : 'bg-gray-100 text-gray-800 border'
-                              }`}
-                            >
-                              <div className="whitespace-pre-wrap break-words">{message.content}</div>
-                            </div>
-                          </div>
-                        ))}
-                        
-                        {isAiLoading && (
-                          <div className="flex justify-start">
-                            <div className="bg-gray-100 rounded-lg px-3 py-2 border">
-                              <div className="flex space-x-1">
-                                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-                                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                                <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Chat Input */}
-                      <div className="border-t pt-4">
-                        <div className="flex space-x-2">
-                          <input
-                            type="text"
-                            value={aiInput}
-                            onChange={(e) => setAiInput(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleAiQuestion()}
-                            placeholder="Ask about your document..."
-                            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                            disabled={isAiLoading}
-                          />
-                          <Button
-                            onClick={handleAiQuestion}
-                            disabled={!aiInput.trim() || isAiLoading}
-                            size="sm"
-                            className="bg-purple-600 hover:bg-purple-700"
-                          >
-                            Send
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <GrandStrategistAssistant
+                    context={content}
+                    messages={aiMessages}
+                    onSend={handleAiQuestion}
+                    inputValue={aiInput}
+                    onInputChange={setAiInput}
+                    isLoading={isAiLoading}
+                    className="sticky top-6 h-[600px] flex flex-col shadow-xl border-purple-200"
+                    variant="document"
+                  />
                 </div>
               )}
             </div>

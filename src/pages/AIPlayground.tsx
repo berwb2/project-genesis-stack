@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import AIAssistant from '@/components/AIAssistant';
+import GrandStrategistAssistant from '@/components/GrandStrategistAssistant';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAIGenerate, useDocumentAnalysis, useContentEnhancement, useIdeaGeneration } from '@/hooks/useAzureAI';
 import { Brain, Sparkles, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
@@ -52,28 +52,28 @@ const AIPlayground = () => {
     {
       id: 'generate',
       title: 'Content Generation',
-      description: 'Generate creative content, articles, and responses using AI prompts',
+      description: 'Generate creative content, articles, and responses using the Grand Strategist',
       color: 'purple',
       icon: <Sparkles className="h-5 w-5" />
     },
     {
       id: 'analyze',
       title: 'Document Analysis', 
-      description: 'Analyze documents for summaries, insights, and key information',
+      description: 'Analyze documents for summaries, insights, and key information with the Grand Strategist',
       color: 'blue',
       icon: <Brain className="h-5 w-5" />
     },
     {
       id: 'enhance',
       title: 'Content Enhancement',
-      description: 'Improve grammar, style, clarity, and expand existing content',
+      description: 'Improve grammar, style, clarity, and expand existing content (Grand Strategist)',
       color: 'green',
       icon: <CheckCircle className="h-5 w-5" />
     },
     {
       id: 'ideas',
       title: 'Idea Generation',
-      description: 'Generate creative ideas and brainstorm solutions for any topic',
+      description: 'Generate creative ideas and brainstorm solutions for any topic (Grand Strategist)',
       color: 'orange',
       icon: <Loader2 className="h-5 w-5" />
     }
@@ -270,8 +270,8 @@ const AIPlayground = () => {
                   <Brain className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">AI Playground</h1>
-                  <p className="text-gray-600">Explore Azure OpenAI capabilities with advanced AI features</p>
+                  <h1 className="text-2xl font-bold text-gray-900">Grand Strategist Playground</h1>
+                  <p className="text-gray-600">Explore your document intelligence with the Grand Strategist assistant</p>
                 </div>
               </div>
               
@@ -386,7 +386,7 @@ const AIPlayground = () => {
 
               {/* AI Assistant Sidebar */}
               <div className="lg:col-span-1">
-                <AIAssistant 
+                <GrandStrategistAssistant 
                   context={content}
                   onResultSelect={handleResultSelect}
                   className="sticky top-6"

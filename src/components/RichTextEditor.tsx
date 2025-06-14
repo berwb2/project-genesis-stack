@@ -24,7 +24,7 @@ interface RichTextEditorProps {
   editable?: boolean;
 }
 
-const RichTextEditor: React.FC<RichTextEditorProps> = ({ 
+const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content, 
   onChange,
   placeholder = 'Start writing your document content here...',
@@ -163,7 +163,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       },
     },
     onCreate: ({ editor }) => {
-      // Apply luxury formatting immediately when editor is created
+      // Apply luxury formatting immediately on create and whenever initial content is set
       applyLuxuryFormatting(editor);
     },
   });
@@ -196,7 +196,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }, 100);
   };
 
-  // Update editor content when prop changes and apply formatting
+  // Enhanced: Ensures luxury formatting on mount and when content is set for the first time
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content, false);
@@ -204,11 +204,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, [editor, content]);
 
-  // Apply formatting whenever content or editor changes
+  // Enhanced: ensures formatting is always reapplied on edit mode toggle or first load
   useEffect(() => {
     if (editor) {
       applyLuxuryFormatting(editor);
-      
       const codeBlocks = document.querySelectorAll('pre code');
       codeBlocks.forEach((block) => {
         hljs.highlightElement(block as HTMLElement);

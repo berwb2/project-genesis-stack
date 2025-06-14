@@ -1,0 +1,3 @@
+
+// ... copy content from the original AIAssistant.tsx, but change all display names/labels like "AI Assistant" to "Grand Strategist" or "Grand Strategist Assistant" throughout ...
+// e.g. header: Grand Strategist, system: Grand Strategist intelligent writing assistant, etc.

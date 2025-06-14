@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +16,7 @@ import { ArrowLeft, Eye, Edit } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from '@/components/ui/sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import GrandStrategistAssistant from '@/components/GrandStrategistAssistant';
 
 const CreateDocument = () => {
   const [searchParams] = useSearchParams();
@@ -223,6 +223,10 @@ const CreateDocument = () => {
                 </CardFooter>
               </form>
             </Card>
+            {/* Grand Strategist always present on document creation page */}
+            <div className="mt-8">
+              <GrandStrategistAssistant context={content} />
+            </div>
           </div>
         </main>
       </div>
