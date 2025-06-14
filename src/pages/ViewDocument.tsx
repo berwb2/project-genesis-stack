@@ -125,9 +125,13 @@ Content (first 2000 chars): ${document.content ? document.content.substring(0,20
 User Question: ${userMessage}
 `;
 
-      const response = await callGrandStrategist(userMessage, {
-        context,
-        documentType: document.content_type ?? 'document',
+      // Call AI with the merged context and user input as message
+      const response = await callGrandStrategist(context, {
+        id: document.id,
+        title: document.title,
+        content: document.content,
+        type: document.content_type ?? 'document',
+        metadata: document.metadata,
       });
 
       const assistantMessage = { role: 'assistant', content: response.response || response.result || response };
