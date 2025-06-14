@@ -112,14 +112,25 @@ const ViewDocument = () => {
     setAiMessages(newMessages);
 
     try {
+      // Compose full context for this document
+      const context = `
+Document Context:
+Title: "${document.title}"
+Type: ${document.content_type}
+Created: ${document.created_at}
+Updated: ${document.updated_at}
+Metadata: ${document.metadata ? JSON.stringify(document.metadata) : "{}"}
+Content (first 2000 chars): ${document.content ? document.content.substring(0,2000) : "[No content]"}
+---
+User Question: ${userMessage}
+`;
+
       const response = await callGrandStrategist(userMessage, {
-        id: document.id,
-        title: document.title,
-        content: document.content,
-        type: 'document'
+        context,
+        documentType: document.content_type ?? 'document',
       });
 
-      const assistantMessage = { role: 'assistant', content: response.response || response };
+      const assistantMessage = { role: 'assistant', content: response.response || response.result || response };
       const updatedMessages = [...newMessages, assistantMessage];
       setAiMessages(updatedMessages);
 
