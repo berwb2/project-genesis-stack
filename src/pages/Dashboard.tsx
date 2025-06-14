@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileText, FolderOpen, BookOpen, Brain, Plus } from 'lucide-react';
+import { FileText, FolderOpen, BookOpen, Brain, Plus, LayoutDashboard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { listDocuments, getCurrentUser } from '@/lib/api';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -50,82 +50,92 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-water-light relative">
       <Navbar />
       <MobileNav />
       
       <div className="flex">
         {!isMobile && <Sidebar />}
         
-        <main className={`flex-1 ${isMobile ? 'px-4 pt-20' : 'p-6'}`}>
+        <main className={`flex-1 ${isMobile ? 'px-2 pt-20' : 'p-8'} transition-all`}>
           <div className="max-w-7xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Welcome back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name}` : ''}
-              </h1>
-              <p className="text-gray-600">Here's what's happening with your workspace today.</p>
+            {/* Banner */}
+            <div className="rounded-2xl bg-gradient-to-r from-water-light to-blue-100 border border-water-light shadow mb-8 px-6 py-8 flex items-center gap-5 overflow-hidden relative">
+              <div className="flex-shrink-0 hidden sm:block">
+                <div className="rounded-full bg-water px-6 py-6 flex items-center justify-center shadow-md">
+                  <LayoutDashboard className="h-10 w-10 text-white" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-serif font-medium text-water-deep mb-2">
+                  Welcome back{user?.user_metadata?.full_name ? `, ${user.user_metadata.full_name}` : ''}
+                </h1>
+                <div className="max-w-2xl text-blue-800 text-base md:text-lg">
+                  Here’s what’s happening in your workspace today. Jump in!
+                </div>
+              </div>
             </div>
 
             {/* Quick Actions */}
-            <div className={`grid gap-4 mb-8 ${isMobile ? 'grid-cols-2' : 'grid-cols-4'}`}>
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-6">
+            <div className={`grid gap-4 mb-10 ${isMobile ? 'grid-cols-2' : 'grid-cols-4'} transition-all`}>
+              <Card className="hover:scale-105 hover:shadow-xl border-water-light transition-all cursor-pointer bg-white/80">
+                <CardContent className="p-5">
                   <Link to="/documents" className="block">
                     <div className="flex items-center gap-4">
-                      <div className="p-3 bg-blue-100 rounded-lg">
-                        <FileText className="h-6 w-6 text-blue-600" />
+                      <div className="p-3 bg-water-light rounded-lg shadow ring-2 ring-water/20">
+                        <FileText className="h-6 w-6 text-water" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Documents</h3>
-                        <p className="text-sm text-gray-600">Manage files</p>
+                        <h3 className="font-semibold text-water-deep">Documents</h3>
+                        <p className="text-xs text-blue-700 opacity-80">Manage files</p>
                       </div>
                     </div>
                   </Link>
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-6">
+              <Card className="hover:scale-105 hover:shadow-xl border-water-light transition-all cursor-pointer bg-white/80">
+                <CardContent className="p-5">
                   <Link to="/folders" className="block">
                     <div className="flex items-center gap-4">
-                      <div className="p-3 bg-green-100 rounded-lg">
-                        <FolderOpen className="h-6 w-6 text-green-600" />
+                      <div className="p-3 bg-blue-200 rounded-lg shadow ring-2 ring-blue-200/20">
+                        <FolderOpen className="h-6 w-6 text-water-deep" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Folders</h3>
-                        <p className="text-sm text-gray-600">Organize content</p>
+                        <h3 className="font-semibold text-water-deep">Folders</h3>
+                        <p className="text-xs text-blue-700 opacity-80">Organize content</p>
                       </div>
                     </div>
                   </Link>
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-6">
+              <Card className="hover:scale-105 hover:shadow-xl border-water-light transition-all cursor-pointer bg-white/80">
+                <CardContent className="p-5">
                   <Link to="/book-writer" className="block">
                     <div className="flex items-center gap-4">
-                      <div className="p-3 bg-purple-100 rounded-lg">
+                      <div className="p-3 bg-purple-100 rounded-lg shadow ring-2 ring-purple-200/20">
                         <BookOpen className="h-6 w-6 text-purple-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Write</h3>
-                        <p className="text-sm text-gray-600">Create books</p>
+                        <h3 className="font-semibold text-water-deep">Write</h3>
+                        <p className="text-xs text-blue-700 opacity-80">Create books</p>
                       </div>
                     </div>
                   </Link>
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-6">
+              <Card className="hover:scale-105 hover:shadow-xl border-water-light transition-all cursor-pointer bg-white/80">
+                <CardContent className="p-5">
                   <Link to="/grand-strategist" className="block">
                     <div className="flex items-center gap-4">
-                      <div className="p-3 bg-orange-100 rounded-lg">
+                      <div className="p-3 bg-orange-100 rounded-lg shadow ring-2 ring-orange-200/20">
                         <Brain className="h-6 w-6 text-orange-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">AI Chat</h3>
-                        <p className="text-sm text-gray-600">Get insights</p>
+                        <h3 className="font-semibold text-water-deep">AI Chat</h3>
+                        <p className="text-xs text-blue-700 opacity-80">Get insights</p>
                       </div>
                     </div>
                   </Link>
@@ -134,19 +144,17 @@ const Dashboard = () => {
             </div>
 
             {/* Recent Documents */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Recent Documents</CardTitle>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to="/documents">View All</Link>
-                  </Button>
-                </div>
+            <Card className="border-water-light bg-white/90 shadow-2xl rounded-2xl">
+              <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
+                <CardTitle className="text-water-deep font-serif text-xl">Recent Documents</CardTitle>
+                <Button variant="outline" size="sm" className="border-water" asChild>
+                  <Link to="/documents">View All</Link>
+                </Button>
               </CardHeader>
               <CardContent>
                 {recentDocuments.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-gray-500 mb-4">No documents yet</p>
+                    <p className="text-blue-500 mb-4 text-lg">No documents yet</p>
                     <Button asChild>
                       <Link to="/create">
                         <Plus className="h-4 w-4 mr-2" />
@@ -155,16 +163,24 @@ const Dashboard = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {recentDocuments.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div className="flex-1">
-                          <Link to={`/documents/${doc.id}`} className="block">
-                            <h4 className="font-medium text-gray-900 hover:text-blue-600">{doc.title}</h4>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {doc.content_type} • Updated {formatDate(doc.updated_at)}
-                            </p>
-                          </Link>
+                      <div
+                        key={doc.id}
+                        className="flex items-center justify-between p-3 bg-gradient-to-r from-white to-blue-50 rounded-xl hover:scale-[1.01] hover:shadow-md transition-all"
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="flex items-center justify-center bg-blue-100 rounded-md h-10 w-10 flex-shrink-0">
+                            <FileText className="h-5 w-5 text-water-deep" />
+                          </div>
+                          <div className="min-w-0">
+                            <Link to={`/documents/${doc.id}`} className="block group">
+                              <h4 className="font-medium text-water-deep group-hover:text-blue-600 truncate">{doc.title}</h4>
+                              <p className="text-xs text-blue-800 opacity-80 mt-0.5 truncate">
+                                {doc.content_type} • Updated {formatDate(doc.updated_at)}
+                              </p>
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     ))}
