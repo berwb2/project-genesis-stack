@@ -2,6 +2,7 @@
 import React from 'react';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
+import { cn } from '@/lib/utils';
 
 interface AIResponseRendererProps {
   content: string;

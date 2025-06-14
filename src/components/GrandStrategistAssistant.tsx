@@ -89,13 +89,14 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
     setIsLoading(true);
 
     try {
-      const richContext = `
-Document Context:
-Title: "${documentTitle || 'General Conversation'}"
-Content: ${context ? context.substring(0, 4000) : "[No content]"}
-`;
+      const documentPayload = {
+        id: documentId || 'general',
+        title: documentTitle || 'General Conversation',
+        content: context || '',
+        type: 'document' as const,
+      };
       
-      const response = await callGrandStrategist(richContext, userMessage);
+      const response = await callGrandStrategist(documentPayload, userMessage);
 
       if (response && (response.response || response.result)) {
         const assistantMessageContent = response.response || response.result;
