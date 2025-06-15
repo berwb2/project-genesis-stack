@@ -46,19 +46,21 @@ const Sidebar = () => {
   
   return (
     <div className={`${collapsed ? 'w-20' : 'w-64'} bg-white dark:bg-slate-900 border-r border-blue-200 dark:border-slate-800 flex flex-col transition-all duration-300 relative`}>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setCollapsed(!collapsed)}
-        className="absolute right-4 top-10 -translate-y-1/2 z-10 bg-background border rounded-full h-6 w-6"
-      >
-        {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
-      </Button>
-
-      <div className="flex items-center justify-center h-20 border-b border-blue-200 dark:border-slate-800">
-        <Link to="/dashboard">
-          <Logo showText={!collapsed} size="md" />
-        </Link>
+      <div className="flex items-center h-20 border-b border-blue-200 dark:border-slate-800 px-4 relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setCollapsed(!collapsed)}
+          className="flex-shrink-0 bg-background border rounded-full h-6 w-6 mr-3"
+        >
+          {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+        </Button>
+        
+        <div className="flex-1 flex justify-center">
+          <Link to="/dashboard">
+            <Logo showText={!collapsed} size="md" />
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-col flex-1 p-4">
