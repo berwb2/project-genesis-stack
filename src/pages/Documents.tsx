@@ -9,6 +9,7 @@ const Documents = () => {
         <div className="py-8 max-w-4xl mx-auto">
           <h1 className="font-serif text-3xl text-water-deep dark:text-blue-200 mb-8">Documents</h1>
           {/* Documents listing */}
+          <p className="text-blue-900 dark:text-blue-100">Documents listing will appear here.</p>
         </div>
       </Layout>
     </div>

@@ -9,6 +9,7 @@ const CreateDocument = () => {
         <div className="py-8 max-w-3xl mx-auto">
           <h1 className="font-serif text-3xl text-water-deep dark:text-blue-200 mb-8">Create Document</h1>
           {/* Create document form goes here */}
+          <p className="text-blue-900 dark:text-blue-100">Create document form will appear here.</p>
         </div>
       </Layout>
     </div>
