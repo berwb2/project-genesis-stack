@@ -22,7 +22,7 @@ const ViewDocument = () => {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [showAI, setShowAI] = useState(true);
-  const { isExporting, exportToPdf } = useDocumentExporter();
+  const { isExporting, downloadAsPdf } = useDocumentExporter();
 
   useEffect(() => {
     if (id) {
@@ -71,9 +71,9 @@ const ViewDocument = () => {
     }
   };
 
-  const handleExportPDF = () => {
+  const handleDownloadPDF = () => {
     if (document) {
-      exportToPdf('pdf-export-area', document.title);
+      downloadAsPdf('pdf-export-area', document.title);
     }
   };
 
@@ -151,7 +151,7 @@ const ViewDocument = () => {
                 onSave={handleSave}
                 onCancel={handleCancelEdit}
                 onEdit={() => setIsEditing(true)}
-                onExportPDF={handleExportPDF}
+                onExportPDF={handleDownloadPDF}
                 onPrint={handlePrint}
                 onToggleAI={() => setShowAI(!showAI)}
               />

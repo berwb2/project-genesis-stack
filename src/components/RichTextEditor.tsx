@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, mergeAttributes } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import CodeBlock from '@tiptap/extension-code-block';
 import Link from '@tiptap/extension-link';
@@ -17,6 +17,13 @@ import 'highlight.js/styles/atom-one-dark.css';
 import EditorToolbar from './editor/EditorToolbar';
 import EditorBubbleMenu from './editor/EditorBubbleMenu';
 import EditorStylesheet from './editor/EditorStylesheet';
+import Heading from '@tiptap/extension-heading';
+import Blockquote from '@tiptap/extension-blockquote';
+import BulletList from '@tiptap/extension-bullet-list';
+import ListItem from '@tiptap/extension-list-item';
+import OrderedList from '@tiptap/extension-ordered-list';
+import HorizontalRule from '@tiptap/extension-horizontal-rule';
+import Code from '@tiptap/extension-code';
 
 interface RichTextEditorProps {
   content: string;
@@ -34,15 +41,61 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3, 4, 5, 6],
-        },
+        heading: false,
+        blockquote: false,
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+        horizontalRule: false,
+        code: false,
+        codeBlock: false,
         paragraph: {
           HTMLAttributes: {
             class: 'luxury-paragraph',
           },
         },
-        codeBlock: false, // Disable default code block to fix console warning
+      }),
+      Heading.configure({ levels: [1, 2, 3, 4, 5, 6] }).extend({
+        renderHTML({ node, HTMLAttributes }) {
+          const level = node.attrs.level;
+          return [
+            `h${level}`,
+            mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
+              class: `luxury-heading-${level}`,
+            }),
+            0,
+          ];
+        },
+      }),
+      Blockquote.configure({
+        HTMLAttributes: {
+          class: 'luxury-blockquote',
+        },
+      }),
+      BulletList.configure({
+        HTMLAttributes: {
+          class: 'luxury-list-bullet',
+        },
+      }),
+      OrderedList.configure({
+        HTMLAttributes: {
+          class: 'luxury-list-numbered',
+        },
+      }),
+      ListItem.configure({
+        HTMLAttributes: {
+          class: 'luxury-list-item',
+        },
+      }),
+      HorizontalRule.configure({
+        HTMLAttributes: {
+          class: 'luxury-divider',
+        },
+      }),
+      Code.configure({
+        HTMLAttributes: {
+          class: 'luxury-inline-code',
+        },
       }),
       CodeBlock.configure({
         HTMLAttributes: {
@@ -107,18 +160,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         
         // Clean up common paste artifacts
         processed = processed.replace(/<!--[\s\S]*?-->/g, ''); // Remove comments
-        processed = processed.replace(/class="[^"]*"/g, ''); // Remove external classes
         processed = processed.replace(/style="[^"]*"/g, ''); // Remove inline styles
+        processed = processed.replace(/class="[^"]*"/g, ''); // Remove all classes, tiptap will add correct ones
         processed = processed.replace(/<span[^>]*>/g, '').replace(/<\/span>/g, ''); // Remove spans
         processed = processed.replace(/<div[^>]*>/g, '<p>').replace(/<\/div>/g, '</p>'); // Convert divs to paragraphs
-        
-        // Apply luxury formatting classes immediately
-        processed = processed.replace(/<h([1-6])([^>]*)>/g, '<h$1 class="luxury-heading-$1">');
-        processed = processed.replace(/<p([^>]*)>/g, '<p class="luxury-paragraph">');
-        processed = processed.replace(/<ul([^>]*)>/g, '<ul class="luxury-list-bullet">');
-        processed = processed.replace(/<ol([^>]*)>/g, '<ol class="luxury-list-numbered">');
-        processed = processed.replace(/<li([^>]*)>/g, '<li class="luxury-list-item">');
-        processed = processed.replace(/<blockquote([^>]*)>/g, '<blockquote class="luxury-blockquote">');
         
         return processed;
       },
@@ -135,15 +180,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             const isOrderedList = lines.every(item => item.match(/^\d+\.\s/));
             
             if (isUnorderedList) {
-                content += '<ul class="luxury-list-bullet">';
+                content += '<ul>';
                 lines.forEach(item => {
-                    content += `<li class="luxury-list-item">${item.replace(/^[\*\-\+]\s/, '')}</li>`;
+                    content += `<li>${item.replace(/^[\*\-\+]\s/, '')}</li>`;
                 });
                 content += '</ul>';
             } else if (isOrderedList) {
-                content += '<ol class="luxury-list-numbered">';
+                content += '<ol>';
                 lines.forEach(item => {
-                    content += `<li class="luxury-list-item">${item.replace(/^\d+\.\s/, '')}</li>`;
+                    content += `<li>${item.replace(/^\d+\.\s/, '')}</li>`;
                 });
                 content += '</ol>';
             } else if (lines.length === 1 && trimmedBlock.match(/^#+\s/)) { // Heading - must be single line block
@@ -152,81 +197,32 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                     const level = match[1].length;
                     const textContent = match[2];
                     if (level <= 6) {
-                        content += `<h${level} class="luxury-heading-${level}">${textContent}</h${level}>`;
+                        content += `<h${level}>${textContent}</h${level}>`;
                     } else { // treat as paragraph if h7 or more
-                        content += `<p class="luxury-paragraph">${trimmedBlock}</p>`;
+                        content += `<p>${trimmedBlock}</p>`;
                     }
                 }
             } else if (trimmedBlock.startsWith('> ')) { // Blockquote
                 const bqContent = lines.map(line => line.replace(/^>\s?/, '')).join('<br>');
-                content += `<blockquote class="luxury-blockquote">${bqContent}</blockquote>`;
+                content += `<blockquote>${bqContent}</blockquote>`;
             } else { // Paragraph
-                content += `<p class="luxury-paragraph">${trimmedBlock.replace(/\n/g, '<br>')}</p>`;
+                content += `<p>${trimmedBlock.replace(/\n/g, '<br>')}</p>`;
             }
         }
         return content;
       },
     },
-    onCreate: ({ editor }) => {
-      // Apply luxury formatting immediately on create and whenever initial content is set
-      applyLuxuryFormatting(editor);
-    },
   });
 
-  // Function to apply luxury formatting to existing content
-  const applyLuxuryFormatting = (editorInstance: any) => {
-    if (!editorInstance) return;
-    setTimeout(() => {
-      const currentContent = editorInstance.getHTML();
-      let luxuryContent = currentContent;
-      
-      // Apply luxury classes to existing elements
-      luxuryContent = luxuryContent.replace(/<h1(?![^>]*class=)/g, '<h1 class="luxury-heading-1"');
-      luxuryContent = luxuryContent.replace(/<h2(?![^>]*class=)/g, '<h2 class="luxury-heading-2"');
-      luxuryContent = luxuryContent.replace(/<h3(?![^>]*class=)/g, '<h3 class="luxury-heading-3"');
-      luxuryContent = luxuryContent.replace(/<h4(?![^>]*class=)/g, '<h4 class="luxury-heading-4"');
-      luxuryContent = luxuryContent.replace(/<h5(?![^>]*class=)/g, '<h5 class="luxury-heading-5"');
-      luxuryContent = luxuryContent.replace(/<h6(?![^>]*class=)/g, '<h6 class="luxury-heading-6"');
-      luxuryContent = luxuryContent.replace(/<p(?![^>]*class=)/g, '<p class="luxury-paragraph"');
-      luxuryContent = luxuryContent.replace(/<ul(?![^>]*class=)/g, '<ul class="luxury-list-bullet"');
-      luxuryContent = luxuryContent.replace(/<ol(?![^>]*class=)/g, '<ol class="luxury-list-numbered"');
-      luxuryContent = luxuryContent.replace(/<li(?![^>]*class=)/g, '<li class="luxury-list-item"');
-      luxuryContent = luxuryContent.replace(/<blockquote(?![^>]*class=)/g, '<blockquote class="luxury-blockquote"');
-      
-      if (luxuryContent !== currentContent) {
-        editorInstance.commands.setContent(luxuryContent, false);
-      }
-      // Add debug log
-      console.debug("[RichTextEditor] Applied luxury formatting after edit mode toggle or content change.");
-    }, 100);
-  };
-
-  // Enhanced: Ensures luxury formatting on mount and when content is set for the first time
-  useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content, false);
-      applyLuxuryFormatting(editor);
-    }
-  }, [editor, content]);
-
-  // Enhanced: ensures formatting is always reapplied on edit mode toggle or first load
+  // Re-apply highlights when content changes
   useEffect(() => {
     if (editor) {
-      applyLuxuryFormatting(editor);
       const codeBlocks = document.querySelectorAll('pre code');
       codeBlocks.forEach((block) => {
         hljs.highlightElement(block as HTMLElement);
       });
     }
-  }, [editor, content]);
-
-  // NEW: Ensure formatting is always reapplied when switching to edit mode ("editable" changes)
-  useEffect(() => {
-    if (editor) {
-      applyLuxuryFormatting(editor);
-      console.debug('[RichTextEditor] Forced re-apply of luxury formatting due to editable toggle:', editable);
-    }
-  }, [editor, editable]);
+  }, [editor, content, editable]);
 
   if (!editor) {
     return (

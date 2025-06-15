@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -6,7 +7,7 @@ import { toast } from '@/components/ui/sonner';
 export const useDocumentExporter = () => {
   const [isExporting, setIsExporting] = useState(false);
 
-  const exportToPdf = async (elementId: string, documentTitle: string) => {
+  const downloadAsPdf = async (elementId: string, documentTitle: string) => {
     const input = document.getElementById(elementId);
     if (!input) {
       toast.error("Could not find the document content to export.");
@@ -81,15 +82,15 @@ export const useDocumentExporter = () => {
       }
       
       pdf.save(`${documentTitle}.pdf`);
-      toast.success("PDF exported successfully!");
+      toast.success("PDF downloaded successfully!");
 
     } catch (error) {
-      console.error("Error exporting to PDF:", error);
-      toast.error("Failed to export PDF. Check console for details.");
+      console.error("Error downloading PDF:", error);
+      toast.error("Failed to download PDF. Check console for details.");
     } finally {
       setIsExporting(false);
     }
   };
 
-  return { isExporting, exportToPdf };
+  return { isExporting, downloadAsPdf };
 };
