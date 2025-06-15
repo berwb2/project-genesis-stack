@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +10,7 @@ import DocumentRenderer from '@/components/DocumentRenderer';
 import Layout from '@/components/ui/layout';
 import { getDocument, updateDocument } from '@/lib/api';
 import { DOCUMENT_TYPES } from '@/types/documentTypes';
-import { ArrowLeft, Edit, Calendar, Clock, MessageSquare, ChevronDown, ChevronUp, Eye, Download } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, Clock, MessageSquare, ChevronDown, ChevronUp, Eye, Download, Printer } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import GrandStrategistAssistant from '@/components/GrandStrategistAssistant';
@@ -83,6 +84,10 @@ const ViewDocument = () => {
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   const generateTableOfContents = () => {
     if (!content) return [];
     
@@ -152,7 +157,7 @@ const ViewDocument = () => {
     <Layout className="bg-gradient-to-br from-blue-50 to-teal-50">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 no-print">
           <Button variant="ghost" asChild className="mb-4 text-blue-600 hover:text-blue-800">
             <Link to="/documents">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -164,7 +169,7 @@ const ViewDocument = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Table of Contents - Left Sidebar */}
           {tableOfContents.length > 0 && (
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-3 no-print">
               <Collapsible open={tocOpen} onOpenChange={setTocOpen}>
                 <CollapsibleTrigger asChild>
                   <Button variant="outline" className="w-full mb-4 lg:hidden bg-white shadow-sm">
@@ -206,8 +211,8 @@ const ViewDocument = () => {
 
           {/* Main Content */}
           <div className={`${tableOfContents.length > 0 ? 'lg:col-span-6' : 'lg:col-span-9'}`}>
-            <Card className="border-blue-200 shadow-xl bg-white/95 backdrop-blur-sm">
-              <CardHeader className="bg-gradient-to-r from-blue-600 to-teal-600 text-white">
+            <Card className="border-blue-200 shadow-xl bg-white/95 backdrop-blur-sm print-section">
+              <CardHeader className="bg-gradient-to-r from-blue-600 to-teal-600 text-white print-section-header">
                 <div className="flex flex-col space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -216,7 +221,7 @@ const ViewDocument = () => {
                           type="text"
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
-                          className="text-xl sm:text-2xl font-bold bg-white/20 border border-white/30 outline-none focus:ring-2 focus:ring-white/50 rounded-lg px-3 py-2 w-full text-white placeholder-white/70"
+                          className="text-xl sm:text-2xl font-bold bg-white/20 border border-white/30 outline-none focus:ring-2 focus:ring-white/50 rounded-lg px-3 py-2 w-full text-white placeholder-white/70 no-print"
                           placeholder="Document title..."
                         />
                       ) : (
@@ -226,7 +231,7 @@ const ViewDocument = () => {
                       )}
                     </div>
                     
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 no-print">
                       <Button
                         variant="secondary"
                         size="sm"
@@ -265,6 +270,14 @@ const ViewDocument = () => {
                         <div className="flex items-center space-x-2">
                            <Button
                             size="sm"
+                            onClick={handlePrint}
+                            className="bg-white text-blue-600 hover:bg-white/90 flex-shrink-0"
+                          >
+                            <Printer className="mr-2 h-4 w-4" />
+                            Print
+                          </Button>
+                           <Button
+                            size="sm"
                             onClick={handleExportPDF}
                             disabled={isExporting}
                             className="bg-white text-blue-600 hover:bg-white/90 flex-shrink-0"
@@ -286,7 +299,7 @@ const ViewDocument = () => {
                   </div>
                   
                   <div className="flex flex-wrap items-center gap-3 text-sm">
-                    <Badge variant="secondary" className={`${documentType.color} bg-white/20 text-white border-white/30`}>
+                    <Badge variant="secondary" className={`${documentType.color} bg-white/20 text-white border-white/30 badge-print`}>
                       {documentType.name}
                     </Badge>
                     
@@ -311,7 +324,7 @@ const ViewDocument = () => {
 
               <CardContent className="p-0">
                 {isEditing ? (
-                  <div className="p-6">
+                  <div className="p-6 no-print">
                     <RichTextEditor
                       content={content}
                       onChange={setContent}
@@ -337,7 +350,7 @@ const ViewDocument = () => {
 
           {/* AI Chat Panel */}
           {showAI && (
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-3 no-print">
               <GrandStrategistAssistant
                 context={content}
                 documentId={id}

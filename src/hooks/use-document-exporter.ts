@@ -21,7 +21,7 @@ export const useDocumentExporter = () => {
       const canvas = await html2canvas(input, {
         scale: 2, // Higher scale for better quality
         useCORS: true,
-        backgroundColor: null,
+        backgroundColor: '#ffffff', // Use white background for PDF
         windowWidth: input.scrollWidth,
         windowHeight: input.scrollHeight,
       });
@@ -35,24 +35,51 @@ export const useDocumentExporter = () => {
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      const imgProps= pdf.getImageProperties(imgData);
+      const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
-      
-      const ratio = canvasHeight / canvasWidth;
-      const imgHeight = pdfWidth * ratio;
-      
+      const headerHeight = 20;
+      const footerHeight = 20;
+      const contentHeight = pdfHeight - headerHeight - footerHeight;
+
       let heightLeft = imgHeight;
       let position = 0;
+      let pageCount = 1;
 
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-      heightLeft -= pdfHeight;
+      const addHeaderAndFooter = (doc: jsPDF, pageNum: number, totalPages: number) => {
+        // Header
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text('DeepWaters Document', 15, 12);
+        doc.text(new Date().toLocaleDateString(), pdfWidth - 15, 12, { align: 'right' });
+        doc.line(15, 15, pdfWidth - 15, 15);
 
+        // Footer
+        if (totalPages > 0) {
+          doc.setFontSize(10);
+          doc.setTextColor(100);
+          doc.line(15, pdfHeight - 15, pdfWidth - 15, pdfHeight - 15);
+          doc.text(`Page ${pageNum} of ${totalPages}`, pdfWidth / 2, pdfHeight - 10, { align: 'center' });
+        }
+      };
+      
+      // Calculate total pages
+      const totalPages = Math.ceil(imgHeight / contentHeight);
+
+      // Add first page
+      addHeaderAndFooter(pdf, pageCount, totalPages);
+      pdf.addImage(imgData, 'PNG', 0, headerHeight, pdfWidth, imgHeight);
+      heightLeft -= contentHeight;
+
+      // Add subsequent pages
       while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
+        position -= contentHeight;
+        pageCount++;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-        heightLeft -= pdfHeight;
+        addHeaderAndFooter(pdf, pageCount, totalPages);
+        pdf.addImage(imgData, 'PNG', 0, position + headerHeight, pdfWidth, imgHeight);
+        heightLeft -= contentHeight;
       }
       
       pdf.save(`${documentTitle}.pdf`);

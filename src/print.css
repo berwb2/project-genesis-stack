@@ -1,0 +1,53 @@
+
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-section {
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+  }
+
+  .print-section-header {
+    background: transparent !important;
+    color: black !important;
+  }
+  
+  .print-section-header * {
+    color: black !important;
+  }
+  
+  .print-section-header .lucide {
+    color: black !important;
+  }
+
+  .print-section-header .badge-print {
+    border: 1px solid #ccc !important;
+    background-color: #f0f0f0 !important;
+    color: black !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  p, blockquote, figure, img, .tiptap > table {
+    page-break-inside: avoid;
+  }
+
+  img {
+    max-width: 100% !important;
+  }
+
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+}
