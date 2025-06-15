@@ -1,10 +1,9 @@
-
 import Image from '@tiptap/extension-image'
 import { ReactNodeViewRenderer } from '@tiptap/react'
 import ResizableImageView from './ResizableImageView'
 
 const CustomImage = Image.extend({
-  name: 'customImage',
+  name: 'image', // Override the default image extension
 
   addAttributes() {
     return {
@@ -37,4 +36,3 @@ const CustomImage = Image.extend({
 })
 
 export default CustomImage
-

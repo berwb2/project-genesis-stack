@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Editor } from '@tiptap/react';
 import { Button } from "@/components/ui/button";
@@ -186,6 +187,40 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
         >
           <AlignJustify className="h-4 w-4" />
         </Button>
+
+        {/* Image Alignment */}
+        {editor.isActive('image') && (
+          <>
+            <Separator orientation="vertical" className="h-6 mx-1" />
+            <Button
+              variant={editor.isActive('image', { 'data-align': 'left' }) ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => editor.chain().focus().updateAttributes('image', { 'data-align': 'left' }).run()}
+              className="h-8 w-8 p-0"
+              title="Align Image Left"
+            >
+              <AlignLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={editor.isActive('image', { 'data-align': 'center' }) ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => editor.chain().focus().updateAttributes('image', { 'data-align': 'center' }).run()}
+              className="h-8 w-8 p-0"
+              title="Align Image Center"
+            >
+              <AlignCenter className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={editor.isActive('image', { 'data-align': 'right' }) ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => editor.chain().focus().updateAttributes('image', { 'data-align': 'right' }).run()}
+              className="h-8 w-8 p-0"
+              title="Align Image Right"
+            >
+              <AlignRight className="h-4 w-4" />
+            </Button>
+          </>
+        )}
 
         <Separator orientation="vertical" className="h-6 mx-1" />
 
