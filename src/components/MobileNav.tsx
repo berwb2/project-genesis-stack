@@ -17,6 +17,7 @@ import {
   Sparkles,
   Shield,
 } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
 
 const MobileNav = () => {
   const [open, setOpen] = useState(false);
@@ -75,6 +76,9 @@ const MobileNav = () => {
               );
             })}
           </nav>
+          <div className="p-4 border-t border-blue-200 dark:border-slate-800">
+            <ThemeToggle />
+          </div>
         </div>
       </SheetContent>
     </Sheet>
