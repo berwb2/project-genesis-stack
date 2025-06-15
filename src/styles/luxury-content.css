@@ -1,0 +1,439 @@
+
+/* Centralized Luxury Document & Editor Styling */
+
+.luxury-document-content,
+.luxury-editor-container .luxury-editor-content {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  line-height: 1.8;
+  color: #1e293b;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.luxury-editor-container .luxury-editor-content {
+  font-size: 18px !important;
+  min-height: 400px !important;
+}
+
+.luxury-document-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, #fafafa 0%, #f8faff 100%);
+  border-radius: 1rem;
+  box-shadow: 0 10px 40px rgba(59, 130, 246, 0.08);
+}
+
+.luxury-document-content img,
+.luxury-editor-content .luxury-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.luxury-editor-content .luxury-image {
+  display: block;
+  margin: 1rem auto;
+  border: 2px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.luxury-document-content img[data-align="left"],
+.luxury-editor-content .luxury-image[data-align="left"] {
+  float: left;
+  margin-right: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.luxury-document-content img[data-align="center"],
+.luxury-editor-content .luxury-image[data-align="center"] {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  float: none;
+}
+.luxury-document-content img[data-align="right"],
+.luxury-editor-content .luxury-image[data-align="right"] {
+  float: right;
+  margin-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.luxury-document-content img[data-align="full"],
+.luxury-editor-content .luxury-image[data-align="full"] {
+  display: block;
+  width: 100%;
+  float: none;
+  margin: 1rem 0;
+}
+
+.luxury-document-content .luxury-heading-1,
+.luxury-editor-content h1,
+.luxury-editor-content .luxury-heading-1 {
+  font-size: 2.5rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin: 2.5rem 0 1.5rem 0 !important;
+  padding-bottom: 0.75rem !important;
+  border-bottom: 3px solid transparent !important;
+  border-image: linear-gradient(90deg, #3b82f6, #06b6d4, #10b981) 1 !important;
+  background: linear-gradient(135deg, #1e40af, #0891b2) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  letter-spacing: -0.02em !important;
+}
+
+.luxury-document-content .luxury-heading-2,
+.luxury-editor-content h2,
+.luxury-editor-content .luxury-heading-2 {
+  font-size: 2rem !important;
+  font-weight: 600 !important;
+  color: #1e40af !important;
+  margin: 2rem 0 1.25rem 0 !important;
+  position: relative !important;
+  letter-spacing: -0.01em !important;
+  padding-left: 1.5rem !important;
+}
+
+.luxury-document-content .luxury-heading-2:before,
+.luxury-editor-content h2:before,
+.luxury-editor-content .luxury-heading-2:before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 4px !important;
+  height: 2rem !important;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4) !important;
+  border-radius: 2px !important;
+}
+.luxury-document-content .luxury-heading-2:before {
+    left: -1rem !important;
+}
+
+.luxury-document-content .luxury-heading-3,
+.luxury-editor-content h3,
+.luxury-editor-content .luxury-heading-3 {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  color: #1d4ed8 !important;
+  margin: 1.75rem 0 1rem 0 !important;
+}
+
+.luxury-document-content .luxury-heading-4,
+.luxury-editor-content h4,
+.luxury-editor-content .luxury-heading-4 {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #2563eb !important;
+  margin: 1.5rem 0 0.75rem 0 !important;
+}
+
+.luxury-document-content .luxury-heading-5,
+.luxury-editor-content h5,
+.luxury-editor-content .luxury-heading-5 {
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+  color: #3b82f6 !important;
+  margin: 1.25rem 0 0.5rem 0 !important;
+}
+
+.luxury-document-content .luxury-heading-6,
+.luxury-editor-content h6,
+.luxury-editor-content .luxury-heading-6 {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  color: #60a5fa !important;
+  margin: 1rem 0 0.5rem 0 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.luxury-document-content .luxury-paragraph,
+.luxury-editor-content p,
+.luxury-editor-content .luxury-paragraph {
+  margin-bottom: 1.5rem !important;
+  font-size: 1.125rem !important;
+  line-height: 1.8 !important;
+  color: #334155 !important;
+  text-align: justify !important;
+  text-justify: inter-word !important;
+}
+
+.luxury-document-content .luxury-list-bullet,
+.luxury-editor-content .luxury-list-bullet,
+.luxury-editor-content ul {
+  margin: 1.5rem 0 !important;
+  padding-left: 2rem !important;
+  list-style: none !important;
+}
+
+.luxury-document-content .luxury-list-numbered,
+.luxury-editor-content .luxury-list-numbered,
+.luxury-editor-content ol {
+  margin: 1.5rem 0 !important;
+  padding-left: 2rem !important;
+  counter-reset: luxury-counter !important;
+}
+
+.luxury-document-content .luxury-list-item,
+.luxury-editor-content .luxury-list-bullet .luxury-list-item,
+.luxury-editor-content ul li {
+  margin-bottom: 0.75rem !important;
+  font-size: 1.125rem !important;
+  line-height: 1.7 !important;
+  color: #475569 !important;
+  position: relative !important;
+}
+
+.luxury-document-content .luxury-list-bullet .luxury-list-item:before,
+.luxury-editor-content .luxury-list-bullet .luxury-list-item:before,
+.luxury-editor-content ul li:before {
+  content: '●' !important;
+  color: #3b82f6 !important;
+  font-weight: bold !important;
+  position: absolute !important;
+  left: -1.5rem !important;
+}
+
+.luxury-document-content .luxury-list-numbered .luxury-list-item,
+.luxury-editor-content .luxury-list-numbered .luxury-list-item,
+.luxury-editor-content ol li {
+  margin-bottom: 0.75rem !important;
+  font-size: 1.125rem !important;
+  line-height: 1.7 !important;
+  color: #475569 !important;
+  position: relative !important;
+  counter-increment: luxury-counter !important;
+}
+
+.luxury-document-content .luxury-list-numbered .luxury-list-item:before,
+.luxury-editor-content .luxury-list-numbered .luxury-list-item:before,
+.luxury-editor-content ol li:before {
+  content: counter(luxury-counter) '.' !important;
+  color: #3b82f6 !important;
+  font-weight: bold !important;
+  position: absolute !important;
+  left: -2rem !important;
+}
+
+.luxury-document-content .luxury-blockquote,
+.luxury-editor-content .luxury-blockquote,
+.luxury-editor-content blockquote {
+  border-left: 4px solid #3b82f6 !important;
+  padding: 1.5rem 2rem !important;
+  margin: 2rem 0 !important;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe) !important;
+  border-radius: 0 0.5rem 0.5rem 0 !important;
+  font-style: italic !important;
+  font-size: 1.125rem !important;
+  color: #1e40af !important;
+  position: relative !important;
+}
+
+.luxury-document-content .luxury-blockquote:before,
+.luxury-editor-content .luxury-blockquote:before,
+.luxury-editor-content blockquote:before {
+  content: '"' !important;
+  font-size: 4rem !important;
+  color: #93c5fd !important;
+  position: absolute !important;
+  left: 0.5rem !important;
+  top: -0.5rem !important;
+  font-family: serif !important;
+}
+
+.luxury-document-content .luxury-table,
+.luxury-editor-content .luxury-table,
+.luxury-editor-content table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 2rem 0 !important;
+  background: white !important;
+  border-radius: 0.75rem !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1) !important;
+}
+
+.luxury-document-content .luxury-table-header,
+.luxury-editor-content .luxury-table-header,
+.luxury-editor-content th {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+  color: white !important;
+  padding: 1rem 1.5rem !important;
+  font-weight: 600 !important;
+  text-align: left !important;
+  font-size: 1rem !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+}
+
+.luxury-document-content .luxury-table-cell,
+.luxury-editor-content .luxury-table-cell,
+.luxury-editor-content td {
+  padding: 1rem 1.5rem !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
+  font-size: 1rem !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+  vertical-align: top !important;
+}
+
+.luxury-editor-content .luxury-table-row:hover,
+.luxury-editor-content tr:hover {
+  background-color: #f8fafc !important;
+}
+.luxury-document-content .luxury-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.luxury-document-content a,
+.luxury-editor-content .luxury-link,
+.luxury-editor-content a {
+  color: #2563eb !important;
+  text-decoration: underline !important;
+  text-decoration-color: #93c5fd !important;
+  text-underline-offset: 0.25rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.luxury-document-content a:hover,
+.luxury-editor-content .luxury-link:hover,
+.luxury-editor-content a:hover {
+  color: #1d4ed8 !important;
+  text-decoration-color: #3b82f6 !important;
+}
+
+
+.luxury-document-content .luxury-inline-code {
+  background: #f1f5f9;
+  color: #dc2626;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  border: 1px solid #e2e8f0;
+}
+
+.luxury-document-content .luxury-code-block,
+.luxury-editor-content .luxury-code-block,
+.luxury-editor-content pre {
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
+  padding: 1.5rem !important;
+  border-radius: 0.75rem !important;
+  margin: 2rem 0 !important;
+  overflow-x: auto !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  font-size: 0.875rem !important;
+  border: 1px solid #374151 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.luxury-document-content .luxury-divider {
+  margin: 3rem 0;
+  border: none;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #3b82f6, #06b6d4, #10b981, transparent);
+  border-radius: 1px;
+}
+
+.luxury-document-content strong,
+.luxury-editor-content strong {
+  font-weight: 700 !important;
+  color: #0f172a !important;
+}
+
+.luxury-document-content em,
+.luxury-editor-content em {
+  font-style: italic !important;
+  color: #475569 !important;
+}
+
+.luxury-editor-content .is-editor-empty:first-child::before {
+  color: #94a3b8 !important;
+  content: attr(data-placeholder) !important;
+  float: left !important;
+  height: 0 !important;
+  pointer-events: none !important;
+  font-style: italic !important;
+  font-size: 1.125rem !important;
+}
+
+.luxury-editor-content .ProseMirror-selectednode .luxury-image {
+  outline: 3px solid #3b82f6;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .luxury-editor-content {
+    font-size: 16px !important;
+  }
+  
+  .luxury-editor-content .luxury-heading-1,
+  .luxury-editor-content h1 {
+    font-size: 2rem !important;
+    margin: 2rem 0 1rem 0 !important;
+  }
+  
+  .luxury-editor-content .luxury-heading-2,
+  .luxury-editor-content h2 {
+    font-size: 1.5rem !important;
+    margin: 1.5rem 0 0.75rem 0 !important;
+    padding-left: 1rem !important;
+  }
+  
+  .luxury-editor-content .luxury-paragraph,
+  .luxury-editor-content p {
+    font-size: 1rem !important;
+    text-align: left !important;
+  }
+  
+  .luxury-editor-content .luxury-blockquote,
+  .luxury-editor-content blockquote {
+    padding: 1rem !important;
+    margin: 1rem 0 !important;
+  }
+  
+  .luxury-editor-content .luxury-table-header,
+  .luxury-editor-content .luxury-table-cell,
+  .luxury-editor-content th,
+  .luxury-editor-content td {
+    padding: 0.75rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  .luxury-document-content {
+    padding: 2rem 1rem;
+    margin: 0 0.5rem;
+  }
+  
+  .luxury-document-content .luxury-heading-1 {
+    font-size: 2rem;
+    margin: 2rem 0 1rem 0;
+  }
+  
+  .luxury-document-content .luxury-heading-2 {
+    font-size: 1.5rem;
+    margin: 1.5rem 0 0.75rem 0;
+  }
+  
+  .luxury-document-content .luxury-paragraph {
+    font-size: 1rem;
+    text-align: left;
+  }
+  
+  .luxury-document-content .luxury-table {
+    font-size: 0.875rem;
+  }
+  
+  .luxury-document-content .luxury-table-header,
+  .luxury-document-content .luxury-table-cell {
+    padding: 0.75rem;
+  }
+}
