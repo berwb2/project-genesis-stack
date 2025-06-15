@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
+import Layout from '@/components/ui/layout';
 import DocumentCard from '@/components/DocumentCard';
 import { Button } from "@/components/ui/button";
 import { Badge } from '@/components/ui/badge';
@@ -217,23 +217,21 @@ const FolderView = () => {
   
   if (isFolderLoading || isDocumentsLoading || areFoldersLoading) {
     return (
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-12 flex justify-center items-center">
+      <Layout>
+        <div className="flex h-full items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading folder...</p>
           </div>
-        </main>
-      </div>
+        </div>
+      </Layout>
     );
   }
   
   if (!folder) {
     return (
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-12 flex justify-center items-center">
+      <Layout>
+        <div className="flex h-full items-center justify-center">
           <div className="text-center">
             <div className="text-2xl font-medium mb-2">Folder Not Found</div>
             <p className="text-muted-foreground mb-6">The folder you're looking for doesn't exist or has been moved.</p>
@@ -241,130 +239,120 @@ const FolderView = () => {
               <Link to="/folders">Back to Folders</Link>
             </Button>
           </div>
-        </main>
-      </div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
-      <Navbar />
+    <Layout>
+      <div className="flex items-center mb-6">
+        <Button variant="ghost" className="mr-4" asChild>
+          <Link to="/folders">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Folders
+          </Link>
+        </Button>
+      </div>
       
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="flex items-center mb-6">
-          <Button variant="ghost" className="mr-4" asChild>
-            <Link to="/folders">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Folders
-            </Link>
-          </Button>
-        </div>
-        
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
-            <div>
-              <h1 
-                className="text-3xl font-serif font-medium mb-2"
-                style={folder.color ? { color: folder.color } : {}}
-              >
-                {folder.name}
-              </h1>
-              
-              {folder.description && (
-                <p className="text-muted-foreground mb-2">
-                  {folder.description}
-                </p>
+      <div className="mb-8">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+          <div>
+            <h1 
+              className="text-3xl font-serif font-medium mb-2"
+              style={folder.color ? { color: folder.color } : {}}
+            >
+              {folder.name}
+            </h1>
+            
+            {folder.description && (
+              <p className="text-muted-foreground mb-2">
+                {folder.description}
+              </p>
+            )}
+            
+            <div className="flex flex-wrap gap-2 mt-3">
+              {folder.priority && (
+                <Badge variant="outline" className={priorityStyles[folder.priority]}>
+                  {folder.priority.charAt(0).toUpperCase() + folder.priority.slice(1)} Priority
+                </Badge>
               )}
               
-              <div className="flex flex-wrap gap-2 mt-3">
-                {folder.priority && (
-                  <Badge variant="outline" className={priorityStyles[folder.priority]}>
-                    {folder.priority.charAt(0).toUpperCase() + folder.priority.slice(1)} Priority
-                  </Badge>
-                )}
-                
-                {folder.category && (
-                  <Badge variant="outline" className="bg-slate-100">
-                    {categoryNames[folder.category as keyof typeof categoryNames]}
-                  </Badge>
-                )}
-              </div>
-            </div>
-            
-            <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
-              <CreateDocumentInFolderButton folderId={id!} onDocumentCreated={handleRefresh} />
-              <CreateNestedFolderButton parentFolderId={id!} onFolderCreated={handleRefresh} />
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Existing
-              </Button>
-              <Button variant="outline" className="text-red-500 hover:text-red-600" onClick={handleDeleteFolder}>
-                <FolderX className="mr-2 h-4 w-4" />
-                Delete Folder
-              </Button>
+              {folder.category && (
+                <Badge variant="outline" className="bg-slate-100">
+                  {categoryNames[folder.category as keyof typeof categoryNames]}
+                </Badge>
+              )}
             </div>
           </div>
-        </div>
-        
-        <div className="mb-8">
-          <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search in this folder..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
+          
+          <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
+            <CreateDocumentInFolderButton folderId={id!} onDocumentCreated={handleRefresh} />
+            <CreateNestedFolderButton parentFolderId={id!} onFolderCreated={handleRefresh} />
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Existing
+            </Button>
+            <Button variant="outline" className="text-red-500 hover:text-red-600" onClick={handleDeleteFolder}>
+              <FolderX className="mr-2 h-4 w-4" />
+              Delete Folder
+            </Button>
           </div>
         </div>
-        
-        {subfolders.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Subfolders</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {subfolders.map((subfolder) => (
-                <FolderCard key={subfolder.id} folder={subfolder} />
-              ))}
+      </div>
+      
+      <div className="mb-8">
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search in this folder..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+      </div>
+      
+      {subfolders.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Subfolders</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {subfolders.map((subfolder) => (
+              <FolderCard key={subfolder.id} folder={subfolder} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Documents</h2>
+        {filteredDocuments.length > 0 ? (
+          <div className="grid sm-grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredDocuments.map((doc) => (
+              <DocumentCard 
+                key={doc.id} 
+                document={doc as DocumentMeta} 
+                contextMenuItems={[
+                  {
+                    label: 'Remove from folder',
+                    onClick: () => handleRemoveDocument(doc.id)
+                  }
+                ]}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16 bg-white rounded-lg border border-dashed">
+            <div className="text-xl font-medium mb-2">
+              {subfolders.length > 0 ? 'No documents in this folder' : 'This folder is empty'}
             </div>
+            <p className="text-muted-foreground mb-6">
+              {searchTerm ? "No items match your search" : "Add a document or subfolder to get started"}
+            </p>
+            <CreateDocumentInFolderButton folderId={id!} onDocumentCreated={handleRefresh} />
           </div>
         )}
-
-        <div>
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Documents</h2>
-          {filteredDocuments.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredDocuments.map((doc) => (
-                <DocumentCard 
-                  key={doc.id} 
-                  document={doc as DocumentMeta} 
-                  contextMenuItems={[
-                    {
-                      label: 'Remove from folder',
-                      onClick: () => handleRemoveDocument(doc.id)
-                    }
-                  ]}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 bg-white rounded-lg border border-dashed">
-              <div className="text-xl font-medium mb-2">
-                {subfolders.length > 0 ? 'No documents in this folder' : 'This folder is empty'}
-              </div>
-              <p className="text-muted-foreground mb-6">
-                {searchTerm ? "No items match your search" : "Add a document or subfolder to get started"}
-              </p>
-              <CreateDocumentInFolderButton folderId={id!} onDocumentCreated={handleRefresh} />
-            </div>
-          )}
-        </div>
-      </main>
-      
-      <footer className="py-6 border-t mt-8">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
-          © {new Date().getFullYear()} DeepWaters. All rights reserved.
-        </div>
-      </footer>
+      </div>
       
       <MoveDocumentDialog 
         isOpen={isAddDialogOpen}
@@ -372,7 +360,7 @@ const FolderView = () => {
         folderId={id || ''}
         onDocumentAdded={handleRefresh}
       />
-    </div>
+    </Layout>
   );
 };
 

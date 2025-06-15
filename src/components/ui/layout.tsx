@@ -10,18 +10,19 @@ import { cn } from '@/lib/utils';
 interface LayoutProps {
   children?: React.ReactNode;
   className?: string;
+  mainClassName?: string;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, className }) => {
+const Layout: React.FC<LayoutProps> = ({ children, className, mainClassName }) => {
   const isMobile = useIsMobile();
 
   return (
     <div className={cn("min-h-screen bg-gray-50", className)}>
       <Navbar />
       <MobileNav />
-      <div className="flex">
+      <div className="flex h-[calc(100vh-4rem)]">
         <Sidebar />
-        <main className={`flex-1 ${isMobile ? 'px-4 pt-4' : 'p-6'}`}>
+        <main className={cn(`flex-1 overflow-y-auto ${isMobile ? 'px-4 pt-4' : 'p-6'}`, mainClassName)}>
           {children || <Outlet />}
         </main>
       </div>
