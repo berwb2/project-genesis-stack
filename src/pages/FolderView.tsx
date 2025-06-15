@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -158,7 +157,7 @@ const FolderView = () => {
     enabled: !!id,
   });
   
-  const subfolders = allFoldersData?.folders?.filter(f => f.parent_folder_id === id) || [];
+  const subfolders = allFoldersData?.folders?.filter(f => f.parent_id === id) || [];
   
   // Filter documents by search term
   const filteredDocuments = documentsData?.documents?.filter(doc => 
@@ -378,4 +377,3 @@ const FolderView = () => {
 };
 
 export default FolderView;
-
