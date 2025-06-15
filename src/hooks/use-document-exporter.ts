@@ -7,6 +7,32 @@ import { toast } from '@/components/ui/sonner';
 export const useDocumentExporter = () => {
   const [isExporting, setIsExporting] = useState(false);
 
+  const addStyledHeaderAndFooter = (doc: jsPDF, pageNum: number, totalPages: number) => {
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 15;
+
+    // Header
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor('#64748b'); // slate-500
+    doc.text('DeepWaters Workspace', margin, 12);
+    
+    // Header Line
+    doc.setDrawColor('#3b82f6'); 
+    doc.setLineWidth(0.3);
+    doc.line(margin, 15, pageW - margin, 15);
+
+    // Footer
+    if (totalPages > 0) {
+      doc.line(margin, pageH - 15, pageW - margin, pageH - 15);
+      doc.setFontSize(9);
+      doc.setTextColor('#64748b');
+      doc.text(`Page ${pageNum} of ${totalPages}`, pageW / 2, pageH - 10, { align: 'center' });
+      doc.text(new Date().toLocaleDateString(), pageW - margin, pageH - 10, { align: 'right' });
+    }
+  };
+
   const downloadAsPdf = async (elementId: string, documentTitle: string) => {
     const input = document.getElementById(elementId);
     if (!input) {
@@ -15,15 +41,13 @@ export const useDocumentExporter = () => {
     }
 
     setIsExporting(true);
-    toast.info("Generating PDF, please wait...");
+    toast.info("Generating your beautiful PDF, please wait...");
 
     try {
       const canvas = await html2canvas(input, {
-        scale: 2, // Higher scale for better quality
+        scale: 2.5, // Higher scale for better quality
         useCORS: true,
-        backgroundColor: '#ffffff', // Use white background for PDF
-        windowWidth: input.scrollWidth,
-        windowHeight: input.scrollHeight,
+        backgroundColor: '#ffffff',
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -36,53 +60,52 @@ export const useDocumentExporter = () => {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      // Cover Page
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(32);
+      pdf.setTextColor('#1e40af'); // deep blue
+      const titleLines = pdf.splitTextToSize(documentTitle, pdfWidth - 30 * 2);
+      pdf.text(titleLines, pdfWidth / 2, pdfHeight / 2 - 30, { align: 'center' });
+      
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(12);
+      pdf.setTextColor('#475569'); // slate-600
+      pdf.text(`Generated from your DeepWaters Workspace`, pdfWidth / 2, pdfHeight / 2, { align: 'center' });
+      pdf.text(new Date().toLocaleString(), pdfWidth / 2, pdfHeight / 2 + 10, { align: 'center' });
 
+
+      // Content pages
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
       const headerHeight = 20;
       const footerHeight = 20;
       const contentHeight = pdfHeight - headerHeight - footerHeight;
 
       let heightLeft = imgHeight;
       let position = 0;
-      let pageCount = 1;
-
-      const addHeaderAndFooter = (doc: jsPDF, pageNum: number, totalPages: number) => {
-        // Header
-        doc.setFontSize(10);
-        doc.setTextColor(100);
-        doc.text('DeepWaters Document', 15, 12);
-        doc.text(new Date().toLocaleDateString(), pdfWidth - 15, 12, { align: 'right' });
-        doc.line(15, 15, pdfWidth - 15, 15);
-
-        // Footer
-        if (totalPages > 0) {
-          doc.setFontSize(10);
-          doc.setTextColor(100);
-          doc.line(15, pdfHeight - 15, pdfWidth - 15, pdfHeight - 15);
-          doc.text(`Page ${pageNum} of ${totalPages}`, pdfWidth / 2, pdfHeight - 10, { align: 'center' });
-        }
-      };
-      
-      // Calculate total pages
+      let pageCount = 0;
       const totalPages = Math.ceil(imgHeight / contentHeight);
 
-      // Add first page
-      addHeaderAndFooter(pdf, pageCount, totalPages);
-      pdf.addImage(imgData, 'PNG', 0, headerHeight, pdfWidth, imgHeight);
-      heightLeft -= contentHeight;
-
-      // Add subsequent pages
-      while (heightLeft > 0) {
-        position -= contentHeight;
+      if (totalPages > 0) {
+        // Add first content page
         pageCount++;
         pdf.addPage();
-        addHeaderAndFooter(pdf, pageCount, totalPages);
-        pdf.addImage(imgData, 'PNG', 0, position + headerHeight, pdfWidth, imgHeight);
+        addStyledHeaderAndFooter(pdf, pageCount, totalPages);
+        pdf.addImage(imgData, 'PNG', 0, headerHeight, pdfWidth, imgHeight);
         heightLeft -= contentHeight;
+
+        // Add subsequent pages
+        while (heightLeft > 0) {
+          position -= contentHeight;
+          pageCount++;
+          pdf.addPage();
+          addStyledHeaderAndFooter(pdf, pageCount, totalPages);
+          pdf.addImage(imgData, 'PNG', 0, position + headerHeight, pdfWidth, imgHeight);
+          heightLeft -= contentHeight;
+        }
       }
       
       pdf.save(`${documentTitle}.pdf`);
-      toast.success("PDF downloaded successfully!");
+      toast.success("PDF masterpiece has been downloaded!");
 
     } catch (error) {
       console.error("Error downloading PDF:", error);
