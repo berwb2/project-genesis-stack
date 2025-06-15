@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -45,7 +46,7 @@ const Books = () => {
     
     let chapters: { wordCount?: number }[] = [];
     try {
-      if (doc.content) {
+      if (doc.content && doc.content.trim() !== '') {
         const parsedContent = JSON.parse(doc.content);
         if (Array.isArray(parsedContent)) {
           chapters = parsedContent;
@@ -90,83 +91,82 @@ const Books = () => {
 
   return (
     <Layout>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-serif font-medium mb-2 text-blue-600">Book Writing Studio</h1>
-            <p className="text-blue-700">Create and manage your books with organized chapters</p>
-          </div>
-          
-          <Button 
-            onClick={() => setIsCreateDialogOpen(true)}
-            className="mt-4 md:mt-0 bg-blue-500 hover:bg-blue-600 text-white"
-          >
-            <Plus className="mr-2 h-4 w-4" /> Create New Book
-          </Button>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-serif font-medium mb-2 text-blue-600">Book Writing Studio</h1>
+          <p className="text-blue-700">Create and manage your books with organized chapters</p>
         </div>
+        
+        <Button 
+          onClick={() => setIsCreateDialogOpen(true)}
+          className="mt-4 md:mt-0 bg-blue-500 hover:bg-blue-600 text-white"
+        >
+          <Plus className="mr-2 h-4 w-4" /> Create New Book
+        </Button>
+      </div>
 
-        {books.length === 0 ? (
-          <Card className="border-blue-200 bg-white shadow-lg">
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Book className="h-16 w-16 text-blue-400 mb-4" />
-              <h2 className="text-xl font-medium mb-2 text-blue-600">Start Your First Book</h2>
-              <p className="text-blue-700 text-center mb-6 max-w-md">
-                Create your first book to begin writing organized chapters and building your literary work.
-              </p>
-              <Button 
-                onClick={() => setIsCreateDialogOpen(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white"
-              >
-                <Plus className="mr-2 h-4 w-4" /> Create Your First Book
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {books.map((book) => (
-              <Card key={book.id} className="hover:shadow-lg transition-shadow border-blue-200 bg-white">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg font-serif text-blue-600">
-                        <Link to={`/documents/${book.id}`} className="hover:text-blue-700 transition-colors">
-                          {book.title}
-                        </Link>
-                      </CardTitle>
-                      {book.description && (
-                        <p className="text-sm text-blue-700 line-clamp-2 mt-2">{book.description}</p>
-                      )}
-                    </div>
-                    {book.cover_image_url && (
-                      <img 
-                        src={book.cover_image_url} 
-                        alt={book.title}
-                        className="w-12 h-16 object-cover rounded border border-blue-200 ml-3"
-                      />
+      {books.length === 0 ? (
+        <Card className="border-blue-200 bg-white shadow-lg">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Book className="h-16 w-16 text-blue-400 mb-4" />
+            <h2 className="text-xl font-medium mb-2 text-blue-600">Start Your First Book</h2>
+            <p className="text-blue-700 text-center mb-6 max-w-md">
+              Create your first book to begin writing organized chapters and building your literary work.
+            </p>
+            <Button 
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+            >
+              <Plus className="mr-2 h-4 w-4" /> Create Your First Book
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {books.map((book) => (
+            <Card key={book.id} className="hover:shadow-lg transition-shadow border-blue-200 bg-white">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <CardTitle className="text-lg font-serif text-blue-600">
+                      <Link to={`/documents/${book.id}`} className="hover:text-blue-700 transition-colors">
+                        {book.title}
+                      </Link>
+                    </CardTitle>
+                    {book.description && (
+                      <p className="text-sm text-blue-700 line-clamp-2 mt-2">{book.description}</p>
                     )}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  {book.cover_image_url && (
+                    <img 
+                      src={book.cover_image_url} 
+                      alt={book.title}
+                      className="w-12 h-16 object-cover rounded border border-blue-200 ml-3"
+                    />
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Badge variant="outline" className="border-blue-200 text-blue-600">
+                    <FileText className="mr-1 h-3 w-3" />
+                    {book.chapter_count} chapters
+                  </Badge>
+                  {book.total_word_count > 0 && (
                     <Badge variant="outline" className="border-blue-200 text-blue-600">
-                      <FileText className="mr-1 h-3 w-3" />
-                      {book.chapter_count} chapters
+                      {book.total_word_count.toLocaleString()} words
                     </Badge>
-                    {book.total_word_count > 0 && (
-                      <Badge variant="outline" className="border-blue-200 text-blue-600">
-                        {book.total_word_count.toLocaleString()} words
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center text-xs text-blue-600">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    <span>Created {format(new Date(book.created_at), 'MMM dd, yyyy')}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </main>
+                  )}
+                </div>
+                <div className="flex items-center text-xs text-blue-600">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  <span>Created {format(new Date(book.created_at), 'MMM dd, yyyy')}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <CreateBookDialog
         isOpen={isCreateDialogOpen}
