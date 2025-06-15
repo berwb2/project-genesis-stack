@@ -3,6 +3,7 @@ import React from 'react';
 import { DocumentMeta } from '@/types/documents';
 import 'highlight.js/styles/github.css';
 import { formatDocumentContent } from '@/lib/formatDocument';
+import EditorStylesheet from '@/components/editor/EditorStylesheet';
 
 interface DocumentRendererProps {
   document: DocumentMeta;
@@ -30,26 +31,30 @@ const DocumentRenderer: React.FC<DocumentRendererProps> = ({
     );
   }
 
-  // The content from the editor should already be formatted with the correct classes.
-  // We can still run some processing for things like code highlighting or other dynamic features.
   const processedContent = formatDocumentContent(document.content as string);
 
+  // We now replicate the exact structure from the RichTextEditor to ensure 1:1 visual parity
+  // between the editor and the rendered view. This removes any styling discrepancies.
   return (
-    <div className="relative">
-      {/* Luxury Document Container */}
-      <div 
-        className={`luxury-document-content ${className}`}
-        dangerouslySetInnerHTML={{ __html: processedContent }}
-        onClick={(e) => {
-          if (onSectionClick && e.target instanceof HTMLElement) {
-            const targetEl = e.target as HTMLElement;
-            const headingEl = targetEl.closest('h1, h2, h3, h4, h5, h6');
-            if (headingEl && headingEl.id) {
-              onSectionClick(headingEl.id);
-            }
-          }
-        }}
-      />
+    <div className={`relative ${className}`}>
+      <div className="p-8 bg-gradient-to-br from-blue-50/30 to-teal-50/30">
+        <div className="luxury-editor-container">
+          <div 
+            className="luxury-editor-content"
+            dangerouslySetInnerHTML={{ __html: processedContent }}
+            onClick={(e) => {
+              if (onSectionClick && e.target instanceof HTMLElement) {
+                const targetEl = e.target as HTMLElement;
+                const headingEl = targetEl.closest('h1, h2, h3, h4, h5, h6');
+                if (headingEl && headingEl.id) {
+                  onSectionClick(headingEl.id);
+                }
+              }
+            }}
+          />
+        </div>
+      </div>
+      <EditorStylesheet />
     </div>
   );
 };

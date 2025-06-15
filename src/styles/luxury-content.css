@@ -1,7 +1,6 @@
 
 /* Centralized Luxury Document & Editor Styling */
 
-.luxury-document-content,
 .luxury-editor-container .luxury-editor-content {
   font-family: 'Georgia', 'Times New Roman', serif;
   line-height: 1.8;
@@ -15,16 +14,6 @@
   min-height: 400px !important;
 }
 
-.luxury-document-content {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 3rem 2rem;
-  background: linear-gradient(135deg, #fafafa 0%, #f8faff 100%);
-  border-radius: 1rem;
-  box-shadow: 0 10px 40px rgba(59, 130, 246, 0.08);
-}
-
-.luxury-document-content img,
 .luxury-editor-content .luxury-image {
   max-width: 100%;
   height: auto;
@@ -39,26 +28,22 @@
   transition: all 0.2s ease-in-out;
 }
 
-.luxury-document-content img[data-align="left"],
 .luxury-editor-content .luxury-image[data-align="left"] {
   float: left;
   margin-right: 1.5rem;
   margin-bottom: 0.5rem;
 }
-.luxury-document-content img[data-align="center"],
 .luxury-editor-content .luxury-image[data-align="center"] {
   display: block;
   margin-left: auto;
   margin-right: auto;
   float: none;
 }
-.luxury-document-content img[data-align="right"],
 .luxury-editor-content .luxury-image[data-align="right"] {
   float: right;
   margin-left: 1.5rem;
   margin-bottom: 0.5rem;
 }
-.luxury-document-content img[data-align="full"],
 .luxury-editor-content .luxury-image[data-align="full"] {
   display: block;
   width: 100%;
@@ -66,7 +51,6 @@
   margin: 1rem 0;
 }
 
-.luxury-document-content .luxury-heading-1,
 .luxury-editor-content h1,
 .luxury-editor-content .luxury-heading-1 {
   font-size: 2.5rem !important;
@@ -83,7 +67,6 @@
   letter-spacing: -0.02em !important;
 }
 
-.luxury-document-content .luxury-heading-2,
 .luxury-editor-content h2,
 .luxury-editor-content .luxury-heading-2 {
   font-size: 2rem !important;
@@ -95,7 +78,6 @@
   padding-left: 1.5rem !important;
 }
 
-.luxury-document-content .luxury-heading-2:before,
 .luxury-editor-content h2:before,
 .luxury-editor-content .luxury-heading-2:before {
   content: '' !important;
@@ -108,11 +90,7 @@
   background: linear-gradient(135deg, #3b82f6, #06b6d4) !important;
   border-radius: 2px !important;
 }
-.luxury-document-content .luxury-heading-2:before {
-    left: -1rem !important;
-}
 
-.luxury-document-content .luxury-heading-3,
 .luxury-editor-content h3,
 .luxury-editor-content .luxury-heading-3 {
   font-size: 1.5rem !important;
@@ -121,7 +99,6 @@
   margin: 1.75rem 0 1rem 0 !important;
 }
 
-.luxury-document-content .luxury-heading-4,
 .luxury-editor-content h4,
 .luxury-editor-content .luxury-heading-4 {
   font-size: 1.25rem !important;
@@ -130,7 +107,6 @@
   margin: 1.5rem 0 0.75rem 0 !important;
 }
 
-.luxury-document-content .luxury-heading-5,
 .luxury-editor-content h5,
 .luxury-editor-content .luxury-heading-5 {
   font-size: 1.125rem !important;
@@ -139,7 +115,6 @@
   margin: 1.25rem 0 0.5rem 0 !important;
 }
 
-.luxury-document-content .luxury-heading-6,
 .luxury-editor-content h6,
 .luxury-editor-content .luxury-heading-6 {
   font-size: 1rem !important;
@@ -150,7 +125,6 @@
   letter-spacing: 0.05em !important;
 }
 
-.luxury-document-content .luxury-paragraph,
 .luxury-editor-content p,
 .luxury-editor-content .luxury-paragraph {
   margin-bottom: 1.5rem !important;
@@ -161,7 +135,6 @@
   text-justify: inter-word !important;
 }
 
-.luxury-document-content .luxury-list-bullet,
 .luxury-editor-content .luxury-list-bullet,
 .luxury-editor-content ul {
   margin: 1.5rem 0 !important;
@@ -169,7 +142,6 @@
   list-style: none !important;
 }
 
-.luxury-document-content .luxury-list-numbered,
 .luxury-editor-content .luxury-list-numbered,
 .luxury-editor-content ol {
   margin: 1.5rem 0 !important;
@@ -177,7 +149,6 @@
   counter-reset: luxury-counter !important;
 }
 
-.luxury-document-content .luxury-list-item,
 .luxury-editor-content .luxury-list-bullet .luxury-list-item,
 .luxury-editor-content ul li {
   margin-bottom: 0.75rem !important;
@@ -187,7 +158,6 @@
   position: relative !important;
 }
 
-.luxury-document-content .luxury-list-bullet .luxury-list-item:before,
 .luxury-editor-content .luxury-list-bullet .luxury-list-item:before,
 .luxury-editor-content ul li:before {
   content: '●' !important;
@@ -197,7 +167,6 @@
   left: -1.5rem !important;
 }
 
-.luxury-document-content .luxury-list-numbered .luxury-list-item,
 .luxury-editor-content .luxury-list-numbered .luxury-list-item,
 .luxury-editor-content ol li {
   margin-bottom: 0.75rem !important;
@@ -208,7 +177,6 @@
   counter-increment: luxury-counter !important;
 }
 
-.luxury-document-content .luxury-list-numbered .luxury-list-item:before,
 .luxury-editor-content .luxury-list-numbered .luxury-list-item:before,
 .luxury-editor-content ol li:before {
   content: counter(luxury-counter) '.' !important;
@@ -218,7 +186,6 @@
   left: -2rem !important;
 }
 
-.luxury-document-content .luxury-blockquote,
 .luxury-editor-content .luxury-blockquote,
 .luxury-editor-content blockquote {
   border-left: 4px solid #3b82f6 !important;
@@ -232,7 +199,6 @@
   position: relative !important;
 }
 
-.luxury-document-content .luxury-blockquote:before,
 .luxury-editor-content .luxury-blockquote:before,
 .luxury-editor-content blockquote:before {
   content: '"' !important;
@@ -244,7 +210,6 @@
   font-family: serif !important;
 }
 
-.luxury-document-content .luxury-table,
 .luxury-editor-content .luxury-table,
 .luxury-editor-content table {
   width: 100% !important;
@@ -256,7 +221,6 @@
   box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1) !important;
 }
 
-.luxury-document-content .luxury-table-header,
 .luxury-editor-content .luxury-table-header,
 .luxury-editor-content th {
   background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
@@ -270,7 +234,6 @@
   hyphens: auto !important;
 }
 
-.luxury-document-content .luxury-table-cell,
 .luxury-editor-content .luxury-table-cell,
 .luxury-editor-content td {
   padding: 1rem 1.5rem !important;
@@ -287,11 +250,7 @@
 .luxury-editor-content tr:hover {
   background-color: #f8fafc !important;
 }
-.luxury-document-content .luxury-table tbody tr:hover {
-  background-color: #f8fafc;
-}
 
-.luxury-document-content a,
 .luxury-editor-content .luxury-link,
 .luxury-editor-content a {
   color: #2563eb !important;
@@ -301,7 +260,6 @@
   transition: all 0.2s ease !important;
 }
 
-.luxury-document-content a:hover,
 .luxury-editor-content .luxury-link:hover,
 .luxury-editor-content a:hover {
   color: #1d4ed8 !important;
@@ -309,7 +267,7 @@
 }
 
 
-.luxury-document-content .luxury-inline-code {
+.luxury-editor-content .luxury-inline-code {
   background: #f1f5f9;
   color: #dc2626;
   padding: 0.25rem 0.5rem;
@@ -319,7 +277,6 @@
   border: 1px solid #e2e8f0;
 }
 
-.luxury-document-content .luxury-code-block,
 .luxury-editor-content .luxury-code-block,
 .luxury-editor-content pre {
   background: #1e293b !important;
@@ -334,7 +291,7 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
 }
 
-.luxury-document-content .luxury-divider {
+.luxury-editor-content .luxury-divider {
   margin: 3rem 0;
   border: none;
   height: 2px;
@@ -342,13 +299,11 @@
   border-radius: 1px;
 }
 
-.luxury-document-content strong,
 .luxury-editor-content strong {
   font-weight: 700 !important;
   color: #0f172a !important;
 }
 
-.luxury-document-content em,
 .luxury-editor-content em {
   font-style: italic !important;
   color: #475569 !important;
@@ -406,34 +361,5 @@
   .luxury-editor-content td {
     padding: 0.75rem !important;
     font-size: 0.875rem !important;
-  }
-
-  .luxury-document-content {
-    padding: 2rem 1rem;
-    margin: 0;
-  }
-  
-  .luxury-document-content .luxury-heading-1 {
-    font-size: 2rem;
-    margin: 2rem 0 1rem 0;
-  }
-  
-  .luxury-document-content .luxury-heading-2 {
-    font-size: 1.5rem;
-    margin: 1.5rem 0 0.75rem 0;
-  }
-  
-  .luxury-document-content .luxury-paragraph {
-    font-size: 1rem;
-    text-align: left;
-  }
-  
-  .luxury-document-content .luxury-table {
-    font-size: 0.875rem;
-  }
-  
-  .luxury-document-content .luxury-table-header,
-  .luxury-document-content .luxury-table-cell {
-    padding: 0.75rem;
   }
 }

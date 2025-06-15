@@ -29,15 +29,13 @@ const DocumentContent: React.FC<DocumentContentProps> = ({
         </div>
       ) : (
         <div id="pdf-export-area">
-          <div className="p-2">
-            <DocumentRenderer 
-              document={{
-                ...document,
-                content: content
-              }} 
-              className="min-h-96"
-            />
-          </div>
+          <DocumentRenderer 
+            document={{
+              ...document,
+              content: content
+            }} 
+            className="min-h-96"
+          />
         </div>
       )}
     </CardContent>
