@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Layout from '@/components/ui/layout';
@@ -44,7 +43,6 @@ const BookWriter = () => {
   const [isCreatingBook, setIsCreatingBook] = useState(false);
   const [newBookTitle, setNewBookTitle] = useState('');
   const [newBookGenre, setNewBookGenre] = useState('Fiction');
-  const [showAISidebar, setShowAISidebar] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const { data: user } = useQuery({
@@ -282,28 +280,6 @@ const BookWriter = () => {
     }
   };
 
-  const chapterDocumentForAI = useMemo(() => {
-    if (!activeChapter || !activeBook || !user) return undefined;
-
-    // The chapter objects don't have their own timestamps.
-    // Using book's timestamps to keep the object stable across re-renders.
-    return {
-      id: activeChapter.id,
-      title: `${activeBook.title} - ${activeChapter.title}`,
-      content: activeChapter.content,
-      content_type: 'chapter' as any,
-      created_at: activeBook.createdAt,
-      updated_at: activeBook.lastEdited,
-      user_id: user.id,
-      is_template: false,
-      metadata: {
-        bookTitle: activeBook.title,
-        bookGenre: activeBook.genre,
-        chapterOrder: activeChapter.order
-      }
-    };
-  }, [activeChapter, activeBook, user]);
-
   if (!activeBook) {
     return (
       <Layout>
@@ -495,15 +471,6 @@ const BookWriter = () => {
                     {activeChapter.wordCount} words
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowAISidebar(!showAISidebar)}
-                  className={`ml-4 border-blue-200 ${showAISidebar ? 'bg-blue-50 text-blue-700' : 'text-blue-600 hover:bg-blue-50'}`}
-                >
-                  <Brain className="mr-2 h-4 w-4" />
-                  Grand Strategist Claude
-                </Button>
               </div>
             </div>
 
@@ -531,24 +498,6 @@ const BookWriter = () => {
           </div>
         )}
       </div>
-      
-      {showAISidebar && (
-        <div className="fixed right-0 top-16 h-[calc(100vh-4rem)] w-96 shadow-lg z-40 bg-white border-l flex flex-col">
-          <div className="p-2 border-b flex justify-between items-center bg-gray-50">
-              <h3 className="font-semibold text-sm pl-2">Grand Strategist Claude</h3>
-              <Button variant="ghost" size="icon" onClick={() => setShowAISidebar(false)}>
-                  <X className="h-4 w-4" />
-              </Button>
-          </div>
-          <GrandStrategistAssistant 
-            documentId={chapterDocumentForAI?.id}
-            documentTitle={chapterDocumentForAI?.title}
-            context={chapterDocumentForAI?.content}
-            variant="document"
-            className="h-full border-none shadow-none bg-transparent"
-          />
-        </div>
-      )}
     </Layout>
   );
 };
