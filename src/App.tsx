@@ -45,7 +45,6 @@ function AppRoutes() {
         <Route path="/book-writer" element={<BookWriter />} />
         <Route path="/grand-strategist" element={<GrandStrategist />} />
         <Route path="/great-general" element={<GreatGeneral />} />
-        <Route path="/ai-playground" element={<AIPlayground />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </TooltipProvider>
