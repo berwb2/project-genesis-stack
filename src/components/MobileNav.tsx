@@ -1,23 +1,11 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Logo from './Logo';
-import { 
-  Menu,
-  Home,
-  FileText, 
-  FolderOpen, 
-  BookOpen,
-  Edit3,
-  Brain,
-  Calendar as CalendarIcon,
-  Settings,
-  Sparkles,
-  Shield,
-} from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
+import { mainNavItems } from '@/config/nav';
 
 const MobileNav = () => {
   const [open, setOpen] = useState(false);
@@ -25,19 +13,6 @@ const MobileNav = () => {
   
   const isActive = (path: string) => location.pathname === path;
   
-  const navItems = [
-    { path: '/dashboard', icon: Home, label: 'Dashboard' },
-    { path: '/documents', icon: FileText, label: 'Documents' },
-    { path: '/folders', icon: FolderOpen, label: 'Folders' },
-    { path: '/books', icon: BookOpen, label: 'Books' },
-    { path: '/book-writer', icon: Edit3, label: 'Book Writer' },
-    { path: '/grand-strategist', icon: Brain, label: 'Grand Strategist' },
-    { path: '/great-general', icon: Shield, label: 'Great General' },
-    { path: '/ai-playground', icon: Sparkles, label: 'AI Playground' },
-    { path: '/calendar', icon: CalendarIcon, label: 'Calendar' },
-    { path: '/account', icon: Settings, label: 'Settings' },
-  ];
-
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -58,7 +33,7 @@ const MobileNav = () => {
           </div>
           
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {navItems.map((item) => {
+            {mainNavItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Button
