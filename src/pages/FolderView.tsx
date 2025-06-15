@@ -1,18 +1,366 @@
-
-import React from 'react';
+import React, { useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/ui/layout';
+import DocumentCard from '@/components/DocumentCard';
+import { Button } from "@/components/ui/button";
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, FolderX, Plus, Search } from 'lucide-react';
+import { getFolder, listFolderDocuments, addDocumentToFolder, removeDocumentFromFolder, deleteFolder, listDocuments, listFolders } from '@/lib/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from '@/components/ui/sonner';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { DocumentMeta, FolderMeta } from '@/types/documents';
+import FolderCard from '@/components/FolderCard';
+import CreateNestedFolderButton from '@/components/CreateNestedFolderButton';
+import CreateDocumentInFolderButton from '@/components/CreateDocumentInFolderButton';
+
+interface MoveDocumentDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  folderId: string;
+  onDocumentAdded: () => void;
+}
+
+// Define custom type for folder category display
+type FolderCategory = 'personal' | 'work' | 'school' | 'project' | 'other';
+
+// Update DocumentCard interface to include optional contextMenuItems
+interface DocumentCardProps {
+  document: any;
+  contextMenuItems?: { label: string; onClick: () => Promise<void> }[];
+}
+
+const MoveDocumentDialog: React.FC<MoveDocumentDialogProps> = ({
+  isOpen,
+  onClose,
+  folderId,
+  onDocumentAdded
+}) => {
+  const [documentId, setDocumentId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Modified to fetch all documents rather than just those not in a folder
+  const { data: documents } = useQuery({
+    queryKey: ['allDocuments'],
+    queryFn: () => listDocuments(),
+    enabled: isOpen,
+  });
+  
+  // Get current folder documents to filter out
+  const { data: currentFolderDocs } = useQuery({
+    queryKey: ['folderDocuments', folderId],
+    queryFn: () => listFolderDocuments(folderId),
+    enabled: isOpen && !!folderId,
+  });
+  
+  // Filter out documents that are already in the current folder
+  const availableDocuments = documents?.documents?.filter(doc => {
+    const isInCurrentFolder = currentFolderDocs?.documents?.some(
+      folderDoc => folderDoc.id === doc.id
+    );
+    return !isInCurrentFolder;
+  });
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!documentId) {
+      toast.error("Please select a document");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      await addDocumentToFolder(folderId, documentId);
+      toast.success("Document added to folder");
+      onDocumentAdded();
+      onClose();
+      setDocumentId('');
+    } catch (error) {
+      console.error("Error adding document to folder:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Add Document to Folder</DialogTitle>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Label htmlFor="document">Select Document</Label>
+            <Select value={documentId} onValueChange={setDocumentId}>
+              <SelectTrigger id="document">
+                <SelectValue placeholder="Select a document" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableDocuments?.length > 0 ? (
+                  availableDocuments.map((doc) => (
+                    <SelectItem key={doc.id} value={doc.id}>
+                      {doc.title}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no-documents" disabled>
+                    No available documents
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <DialogFooter className="mt-6">
+            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="submit" disabled={isSubmitting || !documentId}>
+              {isSubmitting ? 'Adding...' : 'Add to Folder'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const FolderView = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-water-light dark:from-slate-950 dark:to-slate-900 text-blue-900 dark:text-blue-100 transition-colors">
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  
+  // Fetch the folder using React Query
+  const { data: folder, isLoading: isFolderLoading } = useQuery({
+    queryKey: ['folder', id],
+    queryFn: () => id ? getFolder(id) : Promise.reject('No folder ID provided'),
+    enabled: !!id,
+  });
+  
+  // Fetch folder documents
+  const { data: documentsData, isLoading: isDocumentsLoading, refetch: refetchDocuments } = useQuery({
+    queryKey: ['folderDocuments', id],
+    queryFn: () => id ? listFolderDocuments(id) : Promise.reject('No folder ID provided'),
+    enabled: !!id,
+  });
+  
+  // Fetch all folders to find subfolders
+  const { data: allFoldersData, isLoading: areFoldersLoading, refetch: refetchFolders } = useQuery({
+    queryKey: ['folders'],
+    queryFn: () => listFolders(),
+    enabled: !!id,
+  });
+  
+  const subfolders = allFoldersData?.folders?.filter(f => f.parent_id === id) || [];
+  
+  // Filter documents by search term
+  const filteredDocuments = documentsData?.documents?.filter(doc => 
+    doc.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    doc.content.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+  
+  const handleRefresh = () => {
+    refetchDocuments();
+    refetchFolders();
+  };
+
+  // Map priority to styles
+  const priorityStyles: Record<string, string> = {
+    low: "bg-blue-100 text-blue-800",
+    medium: "bg-yellow-100 text-yellow-800",
+    high: "bg-red-100 text-red-800"
+  };
+  
+  // Map category to display names
+  const categoryNames: Record<FolderCategory, string> = {
+    personal: "Personal",
+    work: "Work",
+    school: "School",
+    project: "Project",
+    other: "Other"
+  };
+  
+  const handleRemoveDocument = async (documentId: string) => {
+    if (!id) return;
+    
+    if (window.confirm('Remove this document from the folder?')) {
+      try {
+        await removeDocumentFromFolder(id, documentId);
+        toast.success("Document removed from folder");
+        handleRefresh();
+      } catch (error) {
+        console.error("Error removing document from folder:", error);
+      }
+    }
+  };
+  
+  const handleDeleteFolder = async () => {
+    if (!id) return;
+    
+    if (window.confirm('Are you sure you want to delete this folder? Documents inside will not be deleted.')) {
+      try {
+        await deleteFolder(id);
+        toast.success("Folder deleted successfully");
+        queryClient.invalidateQueries({ queryKey: ['folders'] });
+        navigate('/folders');
+      } catch (error) {
+        console.error("Failed to delete folder:", error);
+      }
+    }
+  };
+  
+  if (isFolderLoading || isDocumentsLoading || areFoldersLoading) {
+    return (
       <Layout>
-        <div className="p-6 max-w-5xl mx-auto">
-          <h1 className="font-serif text-3xl text-water-deep dark:text-blue-200 mb-8">Folder View</h1>
-          {/* Folder contents here */}
-          <p className="text-blue-900 dark:text-blue-100">Folder content will appear here.</p>
+        <div className="flex h-full items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading folder...</p>
+          </div>
         </div>
       </Layout>
-    </div>
+    );
+  }
+  
+  if (!folder) {
+    return (
+      <Layout>
+        <div className="flex h-full items-center justify-center">
+          <div className="text-center">
+            <div className="text-2xl font-medium mb-2">Folder Not Found</div>
+            <p className="text-muted-foreground mb-6">The folder you're looking for doesn't exist or has been moved.</p>
+            <Button asChild>
+              <Link to="/folders">Back to Folders</Link>
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <div className="flex items-center mb-6">
+        <Button variant="ghost" className="mr-4" asChild>
+          <Link to="/folders">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Folders
+          </Link>
+        </Button>
+      </div>
+      
+      <div className="mb-8">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+          <div>
+            <h1 
+              className="text-3xl font-serif font-medium mb-2"
+              style={folder.color ? { color: folder.color } : {}}
+            >
+              {folder.name}
+            </h1>
+            
+            {folder.description && (
+              <p className="text-muted-foreground mb-2">
+                {folder.description}
+              </p>
+            )}
+            
+            <div className="flex flex-wrap gap-2 mt-3">
+              {folder.priority && (
+                <Badge variant="outline" className={priorityStyles[folder.priority]}>
+                  {folder.priority.charAt(0).toUpperCase() + folder.priority.slice(1)} Priority
+                </Badge>
+              )}
+              
+              {folder.category && (
+                <Badge variant="outline" className="bg-slate-100">
+                  {categoryNames[folder.category as keyof typeof categoryNames]}
+                </Badge>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
+            <CreateDocumentInFolderButton folderId={id!} onDocumentCreated={handleRefresh} />
+            <CreateNestedFolderButton parentFolderId={id!} onFolderCreated={handleRefresh} />
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Existing
+            </Button>
+            <Button variant="outline" className="text-red-500 hover:text-red-600" onClick={handleDeleteFolder}>
+              <FolderX className="mr-2 h-4 w-4" />
+              Delete Folder
+            </Button>
+          </div>
+        </div>
+      </div>
+      
+      <div className="mb-8">
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search in this folder..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+      </div>
+      
+      {subfolders.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Subfolders</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {subfolders.map((subfolder) => (
+              <FolderCard key={subfolder.id} folder={subfolder} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Documents</h2>
+        {filteredDocuments.length > 0 ? (
+          <div className="grid sm-grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredDocuments.map((doc) => (
+              <DocumentCard 
+                key={doc.id} 
+                document={doc as DocumentMeta} 
+                contextMenuItems={[
+                  {
+                    label: 'Remove from folder',
+                    onClick: () => handleRemoveDocument(doc.id)
+                  }
+                ]}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16 bg-white rounded-lg border border-dashed">
+            <div className="text-xl font-medium mb-2">
+              {subfolders.length > 0 ? 'No documents in this folder' : 'This folder is empty'}
+            </div>
+            <p className="text-muted-foreground mb-6">
+              {searchTerm ? "No items match your search" : "Add a document or subfolder to get started"}
+            </p>
+            <CreateDocumentInFolderButton folderId={id!} onDocumentCreated={handleRefresh} />
+          </div>
+        )}
+      </div>
+      
+      <MoveDocumentDialog 
+        isOpen={isAddDialogOpen}
+        onClose={() => setIsAddDialogOpen(false)}
+        folderId={id || ''}
+        onDocumentAdded={handleRefresh}
+      />
+    </Layout>
   );
 };
 

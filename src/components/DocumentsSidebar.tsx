@@ -1,16 +1,35 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Search, Settings } from 'lucide-react';
-import { documentsNavItems } from '@/config/nav';
+import { 
+  Home, 
+  FileText, 
+  Folder, 
+  Book, 
+  Brain, 
+  Calendar, 
+  Plus,
+  Search,
+  Settings
+} from 'lucide-react';
 
 const DocumentsSidebar = () => {
   const location = useLocation();
   
   const isActive = (path: string) => location.pathname === path;
   
+  const navigationItems = [
+    { icon: Home, label: 'Dashboard', path: '/dashboard' },
+    { icon: FileText, label: 'Documents', path: '/documents' },
+    { icon: Folder, label: 'Folders', path: '/folders' },
+    { icon: Book, label: 'Books', path: '/books' },
+    { icon: Brain, label: 'Grand Strategist', path: '/grand-strategist' },
+    { icon: Calendar, label: 'Calendar', path: '/calendar' },
+  ];
+
   return (
     <div className="w-64 bg-blue-50 border-r border-blue-200 min-h-screen p-4 space-y-4">
       {/* Quick Actions */}
@@ -38,7 +57,7 @@ const DocumentsSidebar = () => {
           <CardTitle className="text-sm font-medium text-blue-700">Navigation</CardTitle>
         </CardHeader>
         <CardContent className="space-y-1">
-          {documentsNavItems.map((item) => {
+          {navigationItems.map((item) => {
             const Icon = item.icon;
             return (
               <Button
