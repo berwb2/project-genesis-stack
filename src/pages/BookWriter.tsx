@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Layout from '@/components/ui/layout';
 import GrandStrategistAssistantSidebar from '@/components/GrandStrategistAssistantSidebar';
@@ -281,17 +281,19 @@ const BookWriter = () => {
     }
   };
 
-  const getChapterDocument = () => {
-    if (!activeChapter || !activeBook) return undefined;
-    
+  const chapterDocumentForAI = useMemo(() => {
+    if (!activeChapter || !activeBook || !user) return undefined;
+
+    // The chapter objects don't have their own timestamps.
+    // Using book's timestamps to keep the object stable across re-renders.
     return {
       id: activeChapter.id,
       title: `${activeBook.title} - ${activeChapter.title}`,
       content: activeChapter.content,
       content_type: 'chapter' as any,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      user_id: user?.id || '',
+      created_at: activeBook.createdAt,
+      updated_at: activeBook.lastEdited,
+      user_id: user.id,
       is_template: false,
       metadata: {
         bookTitle: activeBook.title,
@@ -299,7 +301,7 @@ const BookWriter = () => {
         chapterOrder: activeChapter.order
       }
     };
-  };
+  }, [activeChapter, activeBook, user]);
 
   if (!activeBook) {
     return (
@@ -531,7 +533,7 @@ const BookWriter = () => {
       
       {showAISidebar && (
         <GrandStrategistAssistantSidebar 
-          document={getChapterDocument()}
+          document={chapterDocumentForAI}
           className="fixed right-0 top-16 h-[calc(100vh-4rem)] shadow-lg z-40"
           onClose={() => setShowAISidebar(false)}
         />

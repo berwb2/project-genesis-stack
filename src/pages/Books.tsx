@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
+import Layout from '@/components/ui/layout';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,8 +42,21 @@ const Books = () => {
   // Transform documents into book format
   const books: BookMeta[] = booksResponse?.documents?.map(doc => {
     const metadata = doc.metadata as any || {};
-    const chapterIds = metadata.chapters || [];
-    const wordCount = doc.content?.split(' ').length || 0;
+    
+    let chapters: { wordCount?: number }[] = [];
+    try {
+      if (doc.content) {
+        const parsedContent = JSON.parse(doc.content);
+        if (Array.isArray(parsedContent)) {
+          chapters = parsedContent;
+        }
+      }
+    } catch (e) {
+      console.error(`Error parsing chapters for book ${doc.id}:`, e);
+      chapters = [];
+    }
+
+    const totalWordCount = chapters.reduce((sum, chapter) => sum + (chapter.wordCount || 0), 0);
     
     return {
       id: doc.id,
@@ -54,8 +66,8 @@ const Books = () => {
       created_at: doc.created_at,
       updated_at: doc.updated_at,
       user_id: doc.user_id,
-      chapter_count: chapterIds.length,
-      total_word_count: wordCount
+      chapter_count: chapters.length,
+      total_word_count: totalWordCount
     };
   }) || [];
 
@@ -65,23 +77,19 @@ const Books = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-1 container mx-auto px-4 py-12 flex justify-center items-center">
+      <Layout>
+        <div className="flex h-full items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-t-blue-400 rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading books...</p>
           </div>
-        </main>
-      </div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
-      <Navbar />
-      
-      <main className="flex-1 container mx-auto px-4 py-8">
+    <Layout>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
             <h1 className="text-3xl font-serif font-medium mb-2 text-blue-600">Book Writing Studio</h1>
@@ -120,7 +128,7 @@ const Books = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="text-lg font-serif text-blue-600">
-                        <Link to={`/books/${book.id}`} className="hover:text-blue-700 transition-colors">
+                        <Link to={`/documents/${book.id}`} className="hover:text-blue-700 transition-colors">
                           {book.title}
                         </Link>
                       </CardTitle>
@@ -166,12 +174,12 @@ const Books = () => {
         onBookCreated={handleBookCreated}
       />
       
-      <footer className="py-6 border-t border-blue-200 bg-blue-50">
+      <footer className="py-6 mt-8 border-t border-blue-200 bg-blue-50">
         <div className="container mx-auto px-4 text-center text-blue-600">
           © {new Date().getFullYear()} DeepWaters. All rights reserved.
         </div>
       </footer>
-    </div>
+    </Layout>
   );
 };
 
