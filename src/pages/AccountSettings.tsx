@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -142,7 +141,7 @@ const AccountSettings = () => {
   }
   
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="min-h-screen bg-background">
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-8">

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -24,20 +25,23 @@ const Sidebar = () => {
   return (
     <div className={`${collapsed ? 'w-20' : 'w-64'} bg-white dark:bg-slate-900 border-r border-blue-200 dark:border-slate-800 flex flex-col transition-all duration-300 relative`}>
       <div className="flex items-center h-20 border-b border-blue-200 dark:border-slate-800 px-4 relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setCollapsed(!collapsed)}
-          className="flex-shrink-0 bg-background border rounded-full h-6 w-6 mr-3"
-        >
-          {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
-        </Button>
-        
-        <div className="flex-1 flex justify-center">
-          <Link to="/dashboard">
-            <Logo showText={!collapsed} size="md" />
-          </Link>
+        {/* Collapse Button on far left */}
+        <div className="flex-shrink-0 flex items-center" style={{ minWidth: 32 }}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCollapsed(!collapsed)}
+            className="bg-background border rounded-full h-6 w-6 mr-3"
+          >
+            {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+          </Button>
         </div>
+        {/* Space between collapse button and logo */}
+        <div className="flex-1" />
+        {/* Logo moved to the right */}
+        <Link to="/dashboard" className="flex items-center" style={{ marginRight: collapsed ? 0 : 0 }}>
+          <Logo showText={!collapsed} size="md" />
+        </Link>
       </div>
 
       <div className="flex flex-col flex-1 p-4">

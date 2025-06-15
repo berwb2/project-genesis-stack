@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -51,7 +52,8 @@ const MobileNav = () => {
               );
             })}
           </nav>
-          <div className="p-4 border-t border-blue-200 dark:border-slate-800">
+          <div className="p-4 border-t border-blue-200 dark:border-slate-800 flex justify-center">
+            {/* Add ThemeToggle so it's always easily accessible */}
             <ThemeToggle />
           </div>
         </div>

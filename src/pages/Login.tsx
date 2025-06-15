@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -73,7 +72,7 @@ const Login = () => {
   };
   
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-water-light/20">
+    <div className="min-h-screen bg-background">
       <header className="container mx-auto px-4 py-6">
         <Link to="/" className="flex items-center">
           <Logo size="sm" />
