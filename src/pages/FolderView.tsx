@@ -5,15 +5,18 @@ import Navbar from '@/components/Navbar';
 import DocumentCard from '@/components/DocumentCard';
 import { Button } from "@/components/ui/button";
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, FolderEdit, FolderX, Plus, Search } from 'lucide-react';
-import { getFolder, listFolderDocuments, addDocumentToFolder, removeDocumentFromFolder, deleteFolder, listDocuments } from '@/lib/api';
+import { ArrowLeft, FolderX, Plus, Search } from 'lucide-react';
+import { getFolder, listFolderDocuments, addDocumentToFolder, removeDocumentFromFolder, deleteFolder, listDocuments, listFolders } from '@/lib/api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/components/ui/sonner';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { DocType, DocumentMeta, FolderMeta, FolderPriority } from '@/types/documents';
+import { DocumentMeta, FolderMeta } from '@/types/documents';
+import FolderCard from '@/components/FolderCard';
+import CreateNestedFolderButton from '@/components/CreateNestedFolderButton';
+import CreateDocumentInFolderButton from '@/components/CreateDocumentInFolderButton';
 
 interface MoveDocumentDialogProps {
   isOpen: boolean;
@@ -142,11 +145,20 @@ const FolderView = () => {
   });
   
   // Fetch folder documents
-  const { data: documentsData, isLoading: isDocumentsLoading, refetch } = useQuery({
+  const { data: documentsData, isLoading: isDocumentsLoading, refetch: refetchDocuments } = useQuery({
     queryKey: ['folderDocuments', id],
     queryFn: () => id ? listFolderDocuments(id) : Promise.reject('No folder ID provided'),
     enabled: !!id,
   });
+  
+  // Fetch all folders to find subfolders
+  const { data: allFoldersData, isLoading: areFoldersLoading, refetch: refetchFolders } = useQuery({
+    queryKey: ['folders'],
+    queryFn: () => listFolders(),
+    enabled: !!id,
+  });
+  
+  const subfolders = allFoldersData?.folders?.filter(f => f.parent_folder_id === id) || [];
   
   // Filter documents by search term
   const filteredDocuments = documentsData?.documents?.filter(doc => 
@@ -154,6 +166,11 @@ const FolderView = () => {
     doc.content.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
   
+  const handleRefresh = () => {
+    refetchDocuments();
+    refetchFolders();
+  };
+
   // Map priority to styles
   const priorityStyles: Record<string, string> = {
     low: "bg-blue-100 text-blue-800",
@@ -177,7 +194,7 @@ const FolderView = () => {
       try {
         await removeDocumentFromFolder(id, documentId);
         toast.success("Document removed from folder");
-        refetch();
+        handleRefresh();
       } catch (error) {
         console.error("Error removing document from folder:", error);
       }
@@ -191,6 +208,7 @@ const FolderView = () => {
       try {
         await deleteFolder(id);
         toast.success("Folder deleted successfully");
+        queryClient.invalidateQueries({ queryKey: ['folders'] });
         navigate('/folders');
       } catch (error) {
         console.error("Failed to delete folder:", error);
@@ -198,13 +216,13 @@ const FolderView = () => {
     }
   };
   
-  if (isFolderLoading || isDocumentsLoading) {
+  if (isFolderLoading || isDocumentsLoading || areFoldersLoading) {
     return (
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-1 container mx-auto px-4 py-12 flex justify-center items-center">
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-t-water rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-16 h-16 border-4 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading folder...</p>
           </div>
         </main>
@@ -230,7 +248,7 @@ const FolderView = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-8">
@@ -268,18 +286,19 @@ const FolderView = () => {
                 
                 {folder.category && (
                   <Badge variant="outline" className="bg-slate-100">
-                    {categoryNames[folder.category as FolderCategory]}
+                    {categoryNames[folder.category as keyof typeof categoryNames]}
                   </Badge>
                 )}
               </div>
             </div>
             
-            <div className="flex gap-2 mt-4 md:mt-0">
+            <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
+              <CreateDocumentInFolderButton folderId={id!} onDocumentCreated={handleRefresh} />
+              <CreateNestedFolderButton parentFolderId={id!} onFolderCreated={handleRefresh} />
               <Button variant="outline" onClick={() => setIsAddDialogOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Document
+                Add Existing
               </Button>
-              
               <Button variant="outline" className="text-red-500 hover:text-red-600" onClick={handleDeleteFolder}>
                 <FolderX className="mr-2 h-4 w-4" />
                 Delete Folder
@@ -292,7 +311,7 @@ const FolderView = () => {
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search documents in this folder..."
+              placeholder="Search in this folder..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -300,35 +319,49 @@ const FolderView = () => {
           </div>
         </div>
         
-        {filteredDocuments.length > 0 ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredDocuments.map((doc) => (
-              <DocumentCard 
-                key={doc.id} 
-                document={doc as DocumentMeta} 
-                contextMenuItems={[
-                  {
-                    label: 'Remove from folder',
-                    onClick: () => handleRemoveDocument(doc.id)
-                  }
-                ]}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <div className="text-xl font-medium mb-2">No documents in this folder</div>
-            <p className="text-muted-foreground mb-6">
-              {searchTerm ? "No documents match your search" : "Add documents to get started"}
-            </p>
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" /> Add Document
-            </Button>
+        {subfolders.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Subfolders</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {subfolders.map((subfolder) => (
+                <FolderCard key={subfolder.id} folder={subfolder} />
+              ))}
+            </div>
           </div>
         )}
+
+        <div>
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Documents</h2>
+          {filteredDocuments.length > 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredDocuments.map((doc) => (
+                <DocumentCard 
+                  key={doc.id} 
+                  document={doc as DocumentMeta} 
+                  contextMenuItems={[
+                    {
+                      label: 'Remove from folder',
+                      onClick: () => handleRemoveDocument(doc.id)
+                    }
+                  ]}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 bg-white rounded-lg border border-dashed">
+              <div className="text-xl font-medium mb-2">
+                {subfolders.length > 0 ? 'No documents in this folder' : 'This folder is empty'}
+              </div>
+              <p className="text-muted-foreground mb-6">
+                {searchTerm ? "No items match your search" : "Add a document or subfolder to get started"}
+              </p>
+              <CreateDocumentInFolderButton folderId={id!} onDocumentCreated={handleRefresh} />
+            </div>
+          )}
+        </div>
       </main>
       
-      <footer className="py-6 border-t">
+      <footer className="py-6 border-t mt-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
           © {new Date().getFullYear()} DeepWaters. All rights reserved.
         </div>
@@ -338,10 +371,11 @@ const FolderView = () => {
         isOpen={isAddDialogOpen}
         onClose={() => setIsAddDialogOpen(false)}
         folderId={id || ''}
-        onDocumentAdded={refetch}
+        onDocumentAdded={handleRefresh}
       />
     </div>
   );
 };
 
 export default FolderView;
+
