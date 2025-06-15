@@ -18,6 +18,7 @@ import {
   Sparkles,
   Shield
 } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -49,7 +50,7 @@ const Sidebar = () => {
         variant="ghost"
         size="icon"
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-8 z-10 bg-white dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-full h-6 w-6"
+        className="absolute -right-3 top-24 z-10 bg-background border rounded-full h-6 w-6"
       >
         {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </Button>
@@ -80,6 +81,9 @@ const Sidebar = () => {
             );
           })}
         </nav>
+      </div>
+      <div className="p-4 border-t border-blue-200 dark:border-slate-800">
+        <ThemeToggle collapsed={collapsed} />
       </div>
     </div>
   );

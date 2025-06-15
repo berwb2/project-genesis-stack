@@ -16,7 +16,7 @@ const Layout: React.FC<LayoutProps> = ({ children, className, mainClassName }) =
   const isMobile = useIsMobile();
 
   return (
-    <div className={cn("flex flex-col h-screen bg-gray-50", className)}>
+    <div className={cn("flex flex-col h-screen bg-background", className)}>
       <Navbar />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
