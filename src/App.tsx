@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -7,6 +6,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from './contexts/AuthContext';
 import { SoundProvider } from './contexts/SoundContext';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 import Index from './pages/Index';
 import Login from './pages/Login';
@@ -60,15 +60,17 @@ function App() {
       },
     },
   });
-  
+
   return (
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ThemeProvider defaultTheme="dark" storageKey="deepwaters-theme">
             <SoundProvider>
-              <Toaster />
-              <AppRoutes />
+              <ErrorBoundary>
+                <Toaster />
+                <AppRoutes />
+              </ErrorBoundary>
             </SoundProvider>
           </ThemeProvider>
         </AuthProvider>
