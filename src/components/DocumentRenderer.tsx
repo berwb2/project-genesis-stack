@@ -104,6 +104,31 @@ const DocumentRenderer: React.FC<DocumentRendererProps> = ({
           overflow-wrap: break-word;
         }
         
+        .luxury-document-content img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 0.5rem;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          border: 1px solid #e2e8f0;
+        }
+
+        .luxury-document-content img[data-align="left"] {
+          float: left;
+          margin: 0.5rem 1.5rem 0.5rem 0;
+        }
+        
+        .luxury-document-content img[data-align="center"] {
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+          float: none;
+        }
+        
+        .luxury-document-content img[data-align="right"] {
+          float: right;
+          margin: 0.5rem 0 0.5rem 1.5rem;
+        }
+
         .luxury-document-content .luxury-heading-1 {
           font-size: 2.5rem;
           font-weight: 700;

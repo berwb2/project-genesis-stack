@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -60,7 +61,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }),
       Underline,
       TextAlign.configure({
-        types: ['heading', 'paragraph'],
+        types: ['heading', 'paragraph', 'image'],
       }),
       Table.configure({
         resizable: true,
@@ -536,6 +537,23 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         .luxury-editor-content .ProseMirror-selectednode .luxury-image {
           outline: 3px solid #3b82f6;
           box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+        }
+
+        .luxury-editor-content .luxury-image[data-align="left"] {
+          float: left;
+          margin-right: 1.5rem;
+          margin-bottom: 0.5rem;
+        }
+        .luxury-editor-content .luxury-image[data-align="center"] {
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+          float: none;
+        }
+        .luxury-editor-content .luxury-image[data-align="right"] {
+          float: right;
+          margin-left: 1.5rem;
+          margin-bottom: 0.5rem;
         }
 
         /* Mobile responsive adjustments */
