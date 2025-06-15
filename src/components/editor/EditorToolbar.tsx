@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Editor } from '@tiptap/react';
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -18,14 +18,20 @@ import {
   Link,
   Table,
   Plus,
-  Minus
+  Minus,
+  Image as ImageIcon,
+  Loader2
 } from 'lucide-react';
+import { uploadDocumentImage } from '@/lib/api';
+import { toast } from '@/components/ui/sonner';
 
 interface EditorToolbarProps {
   editor: Editor;
 }
 
 const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
+  const [isUploading, setIsUploading] = useState(false);
+
   if (!editor) {
     return null;
   }
@@ -76,6 +82,30 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
     }
 
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+  };
+
+  const handleImageUpload = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async () => {
+      if (input.files?.length) {
+        const file = input.files[0];
+        setIsUploading(true);
+        try {
+          const url = await uploadDocumentImage(file);
+          if (url) {
+            editor.chain().focus().setImage({ src: url, alt: file.name }).run();
+          }
+        } catch (error) {
+          console.error("Image upload failed", error);
+          toast.error("Image upload failed.");
+        } finally {
+          setIsUploading(false);
+        }
+      }
+    };
+    input.click();
   };
 
   return (
@@ -206,6 +236,20 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
           className="h-8 w-8 p-0"
         >
           <Link className="h-4 w-4" />
+        </Button>
+
+        <Separator orientation="vertical" className="h-6 mx-1" />
+
+        {/* Image Upload */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleImageUpload}
+          disabled={isUploading}
+          className="h-8 w-8 p-0"
+          title="Insert Image"
+        >
+          {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
         </Button>
 
         <Separator orientation="vertical" className="h-6 mx-1" />

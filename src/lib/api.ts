@@ -1,5 +1,6 @@
-import { supabase } from "@/integrations/supabase/client";
-import { DocumentMeta, FolderMeta } from "@/types/documents";
+import { supabase } from '@/integrations/supabase/client';
+import { DocumentMeta } from '@/types/documents';
+import { toast } from '@/components/ui/sonner';
 
 // Authentication Functions
 export const getCurrentUser = async () => {
@@ -983,3 +984,37 @@ export const deleteChapter = async (chapterId: string) => {
 
   return { success: true };
 };
+
+export async function uploadDocumentImage(file: File): Promise<string> {
+  toast.info("Image upload is a demo. Using a placeholder image.");
+  console.log("Uploading image...", file.name);
+
+  // In a real implementation, you would upload to Supabase Storage like this.
+  // We'll set this up in the next step after creating the storage bucket.
+  /*
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${crypto.randomUUID()}.${fileExt}`;
+  
+  const { data, error } = await supabase.storage
+    .from('document_images')
+    .upload(fileName, file);
+
+  if (error) {
+    console.error('Error uploading image:', error);
+    throw error;
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('document_images')
+    .getPublicUrl(data.path);
+
+  return publicUrl;
+  */
+
+  // For now, returning a placeholder with a simulated delay.
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(`https://placehold.co/600x400?text=${encodeURIComponent(file.name)}`);
+    }, 1000);
+  });
+}

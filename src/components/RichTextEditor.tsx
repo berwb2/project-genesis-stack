@@ -10,6 +10,7 @@ import TableRow from '@tiptap/extension-table-row';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from './editor/TableHeader';
 import TextAlign from '@tiptap/extension-text-align';
+import Image from '@tiptap/extension-image';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/atom-one-dark.css';
 
@@ -82,6 +83,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       TableCell.configure({
         HTMLAttributes: {
           class: 'luxury-table-cell',
+        },
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          class: 'luxury-image',
         },
       }),
     ],
@@ -516,6 +522,22 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           font-size: 1.125rem !important;
         }
         
+        .luxury-editor-content .luxury-image {
+          max-width: 100%;
+          height: auto;
+          display: block;
+          margin: 1rem auto;
+          border-radius: 0.5rem;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          border: 2px solid transparent;
+          transition: all 0.2s ease-in-out;
+        }
+
+        .luxury-editor-content .ProseMirror-selectednode .luxury-image {
+          outline: 3px solid #3b82f6;
+          box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+        }
+
         /* Mobile responsive adjustments */
         @media (max-width: 768px) {
           .luxury-editor-content {
