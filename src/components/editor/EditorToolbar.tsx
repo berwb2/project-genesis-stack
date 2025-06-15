@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Editor } from '@tiptap/react';
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,8 @@ import {
   Plus,
   Minus,
   Image as ImageIcon,
-  Loader2
+  Loader2,
+  Maximize
 } from 'lucide-react';
 import { uploadDocumentImage } from '@/lib/api';
 import { toast } from '@/components/ui/sonner';
@@ -218,6 +218,15 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
               title="Align Image Right"
             >
               <AlignRight className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={editor.isActive('image', { 'data-align': 'full' }) ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => editor.chain().focus().updateAttributes('image', { 'data-align': 'full' }).run()}
+              className="h-8 w-8 p-0"
+              title="Full Width Image"
+            >
+              <Maximize className="h-4 w-4" />
             </Button>
           </>
         )}

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DocumentMeta } from '@/types/documents';
 import 'highlight.js/styles/github.css';
@@ -127,6 +126,13 @@ const DocumentRenderer: React.FC<DocumentRendererProps> = ({
         .luxury-document-content img[data-align="right"] {
           float: right;
           margin: 0.5rem 0 0.5rem 1.5rem;
+        }
+
+        .luxury-document-content img[data-align="full"] {
+          width: 100%;
+          display: block;
+          float: none;
+          margin: 1.5rem 0;
         }
 
         .luxury-document-content .luxury-heading-1 {

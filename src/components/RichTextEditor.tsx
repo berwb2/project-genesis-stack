@@ -555,12 +555,21 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           margin-left: 1.5rem;
           margin-bottom: 0.5rem;
         }
+        .luxury-editor-content .luxury-image[data-align="full"] {
+          display: block;
+          width: 100%;
+          float: none;
+          margin: 1rem 0;
+        }
 
         /* NEW styles for resizable images */
         .resizable-image-wrapper.is-selected .resizable {
           outline: 2px solid #3b82f6;
           resize: horizontal;
           overflow: auto;
+        }
+        .resizable-image-wrapper.is-full-width .resizable {
+          resize: none !important;
         }
         .resizable-image-wrapper .resizable {
           max-width: 100%;

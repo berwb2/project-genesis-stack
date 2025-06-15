@@ -6,9 +6,19 @@ import { cn } from '@/lib/utils'
 const ResizableImageView: React.FC<NodeViewProps> = ({ node, updateAttributes, selected }) => {
   const { src, alt, title, width, 'data-align': align } = node.attrs;
   const imgRef = useRef<HTMLImageElement>(null);
+  const observerRef = useRef<ResizeObserver | null>(null);
 
   useEffect(() => {
     if (!imgRef.current) return;
+
+    // Disconnect previous observer if it exists
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    if (align === 'full') {
+      return; // Do not observe size changes for full-width images
+    }
     
     const observer = new ResizeObserver((entries) => {
         const entry = entries[0];
@@ -20,17 +30,25 @@ const ResizableImageView: React.FC<NodeViewProps> = ({ node, updateAttributes, s
     });
     
     observer.observe(imgRef.current);
+    observerRef.current = observer;
     
     return () => {
       observer.disconnect();
     };
-  }, [node.attrs.width, updateAttributes]);
+  }, [node.attrs.width, updateAttributes, align]);
 
   const wrapperStyle: React.CSSProperties = {
     lineHeight: 0,
   };
 
-  if (align === 'center') {
+  let finalWidth = width || 'auto';
+
+  if (align === 'full') {
+    wrapperStyle.width = '100%';
+    wrapperStyle.float = 'none';
+    wrapperStyle.display = 'block';
+    finalWidth = '100%';
+  } else if (align === 'center') {
     wrapperStyle.display = 'block';
     wrapperStyle.marginLeft = 'auto';
     wrapperStyle.marginRight = 'auto';
@@ -46,7 +64,7 @@ const ResizableImageView: React.FC<NodeViewProps> = ({ node, updateAttributes, s
   return (
     <NodeViewWrapper
       as="div"
-      className={cn('resizable-image-wrapper group', { 'is-selected': selected })}
+      className={cn('resizable-image-wrapper group', { 'is-selected': selected, 'is-full-width': align === 'full' })}
       style={wrapperStyle}
     >
       <img
@@ -55,11 +73,10 @@ const ResizableImageView: React.FC<NodeViewProps> = ({ node, updateAttributes, s
         alt={alt}
         title={title}
         className="luxury-image resizable"
-        style={{ width: width || 'auto' }}
+        style={{ width: finalWidth }}
       />
     </NodeViewWrapper>
   )
 }
 
 export default ResizableImageView;
-
