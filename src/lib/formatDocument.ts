@@ -56,7 +56,12 @@ export function processCrossLinks(content: string): string {
 
 // Function to format the document content with all enhancements
 export function formatDocumentContent(content: string): string {
+  if (typeof content !== 'string') return '';
+  
   let formattedContent = content;
+  
+  // The content is now expected to have classes from the editor.
+  // We can still run processors for things that are not about basic element styling.
   
   // Highlight code blocks
   formattedContent = highlightCodeBlocks(formattedContent);

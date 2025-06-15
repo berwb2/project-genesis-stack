@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { DocumentMeta } from '@/types/documents';
 import 'highlight.js/styles/github.css';
+import { formatDocumentContent } from '@/lib/formatDocument';
 
 interface DocumentRendererProps {
   document: DocumentMeta;
@@ -28,47 +30,9 @@ const DocumentRenderer: React.FC<DocumentRendererProps> = ({
     );
   }
 
-  // Process HTML content to enhance formatting with DeepWaters blue-themed styling
-  let processedContent = document.content as string;
-  if (typeof processedContent === 'string') {
-    // Enhanced heading styles with blue theme
-    processedContent = processedContent
-      .replace(/<h1([^>]*)>/g, '<h1$1 class="luxury-heading-1">')
-      .replace(/<h2([^>]*)>/g, '<h2$1 class="luxury-heading-2">')
-      .replace(/<h3([^>]*)>/g, '<h3$1 class="luxury-heading-3">')
-      .replace(/<h4([^>]*)>/g, '<h4$1 class="luxury-heading-4">')
-      .replace(/<h5([^>]*)>/g, '<h5$1 class="luxury-heading-5">')
-      .replace(/<h6([^>]*)>/g, '<h6$1 class="luxury-heading-6">');
-    
-    // Enhanced paragraph styling
-    processedContent = processedContent
-      .replace(/<p([^>]*)>/g, '<p$1 class="luxury-paragraph">');
-    
-    // Enhanced list styling
-    processedContent = processedContent
-      .replace(/<ul([^>]*)>/g, '<ul$1 class="luxury-list-bullet">')
-      .replace(/<ol([^>]*)>/g, '<ol$1 class="luxury-list-numbered">')
-      .replace(/<li([^>]*)>/g, '<li$1 class="luxury-list-item">');
-    
-    // Enhanced blockquote styling
-    processedContent = processedContent
-      .replace(/<blockquote([^>]*)>/g, '<blockquote$1 class="luxury-blockquote">');
-    
-    // Enhanced table styling
-    processedContent = processedContent
-      .replace(/<table([^>]*)>/g, '<table$1 class="luxury-table">')
-      .replace(/<th([^>]*)>/g, '<th$1 class="luxury-table-header">')
-      .replace(/<td([^>]*)>/g, '<td$1 class="luxury-table-cell">');
-    
-    // Enhanced code styling
-    processedContent = processedContent
-      .replace(/<code([^>]*)>/g, '<code$1 class="luxury-inline-code">')
-      .replace(/<pre([^>]*)>/g, '<pre$1 class="luxury-code-block">');
-    
-    // Add luxury dividers
-    processedContent = processedContent
-      .replace(/<hr\s*\/?>/g, '<hr class="luxury-divider" />');
-  }
+  // The content from the editor should already be formatted with the correct classes.
+  // We can still run some processing for things like code highlighting or other dynamic features.
+  const processedContent = formatDocumentContent(document.content as string);
 
   return (
     <div className="relative">

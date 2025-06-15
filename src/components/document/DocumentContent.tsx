@@ -20,7 +20,7 @@ const DocumentContent: React.FC<DocumentContentProps> = ({
   return (
     <CardContent className="p-0">
       {isEditing ? (
-        <div className="p-6 no-print">
+        <div className="no-print">
           <RichTextEditor
             content={content}
             onChange={onContentChange}

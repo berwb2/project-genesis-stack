@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -185,13 +184,11 @@ const CreateDocument = () => {
                     />
                   </div>
                 ) : (
-                  <div className="border rounded-md border-blue-200">
-                    <RichTextEditor 
-                      content={content} 
-                      onChange={setContent} 
-                      placeholder="Start writing your document content here..." 
-                    />
-                  </div>
+                  <RichTextEditor 
+                    content={content} 
+                    onChange={setContent} 
+                    placeholder="Start writing your document content here..." 
+                  />
                 )}
               </div>
             </CardContent>
