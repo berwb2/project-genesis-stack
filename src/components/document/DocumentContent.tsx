@@ -2,7 +2,6 @@
 import React from 'react';
 import { CardContent } from "@/components/ui/card";
 import RichTextEditor from '@/components/RichTextEditor';
-import DocumentRenderer from '@/components/DocumentRenderer';
 
 interface DocumentContentProps {
   isEditing: boolean;
@@ -15,7 +14,6 @@ const DocumentContent: React.FC<DocumentContentProps> = ({
   isEditing,
   content,
   onContentChange,
-  document,
 }) => {
   return (
     <CardContent className="p-0">
@@ -25,16 +23,15 @@ const DocumentContent: React.FC<DocumentContentProps> = ({
             content={content}
             onChange={onContentChange}
             placeholder="Start writing your document content here..."
+            editable={true}
           />
         </div>
       ) : (
         <div id="pdf-export-area">
-          <DocumentRenderer 
-            document={{
-              ...document,
-              content: content
-            }} 
-            className="min-h-96"
+          <RichTextEditor 
+            content={content}
+            onChange={() => {}}
+            editable={false}
           />
         </div>
       )}

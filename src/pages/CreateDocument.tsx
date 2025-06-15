@@ -167,27 +167,17 @@ const CreateDocument = () => {
                 </div>
                 
                 {previewMode ? (
-                  <div className="border rounded-xl shadow-lg bg-white border-blue-200 overflow-hidden">
-                    <DocumentRenderer 
-                      document={{
-                        id: 'preview',
-                        title: title || 'Document Preview',
-                        content: content,
-                        content_type: documentType,
-                        created_at: new Date().toISOString(),
-                        updated_at: new Date().toISOString(),
-                        user_id: '',
-                        is_template: false,
-                        metadata: {}
-                      }} 
-                      className="min-h-96"
-                    />
-                  </div>
+                  <RichTextEditor 
+                    content={content} 
+                    onChange={() => {}} 
+                    editable={false}
+                  />
                 ) : (
                   <RichTextEditor 
                     content={content} 
                     onChange={setContent} 
                     placeholder="Start writing your document content here..." 
+                    editable={true}
                   />
                 )}
               </div>
