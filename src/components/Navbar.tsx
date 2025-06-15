@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -97,7 +96,7 @@ const Navbar = () => {
                   <Button variant="ghost" asChild>
                     <Link to="/login">Sign In</Link>
                   </Button>
-                  <Button asChild className="bg-blue-500 hover:bg-blue-600">
+                  <Button asChild>
                     <Link to="/login">Get Started</Link>
                   </Button>
                 </div>

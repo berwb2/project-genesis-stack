@@ -68,11 +68,7 @@ const Sidebar = () => {
                 key={item.path}
                 asChild
                 variant={isActive(item.path) ? "default" : "ghost"}
-                className={`${collapsed ? 'w-10 h-10 p-0 justify-center' : 'w-full justify-start'} ${
-                  isActive(item.path) 
-                    ? 'bg-blue-500 text-white hover:bg-blue-600' 
-                    : 'text-blue-700 hover:bg-blue-50'
-                }`}
+                className={`${collapsed ? 'w-10 h-10 p-0 justify-center' : 'w-full justify-start'}`}
                 title={collapsed ? item.label : undefined}
               >
                 <Link to={item.path} className={`${collapsed ? 'w-full h-full flex items-center justify-center' : ''}`}>

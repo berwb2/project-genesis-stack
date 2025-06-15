@@ -63,11 +63,7 @@ const MobileNav = () => {
                   key={item.path}
                   asChild
                   variant={isActive(item.path) ? "default" : "ghost"}
-                  className={`w-full justify-start ${
-                    isActive(item.path) 
-                      ? 'bg-blue-500 text-white hover:bg-blue-600' 
-                      : 'text-blue-700 hover:bg-blue-50'
-                  }`}
+                  className="w-full justify-start"
                   onClick={() => setOpen(false)}
                 >
                   <Link to={item.path}>
