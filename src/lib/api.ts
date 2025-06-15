@@ -986,14 +986,10 @@ export const deleteChapter = async (chapterId: string) => {
 };
 
 export async function uploadDocumentImage(file: File): Promise<string> {
-  toast.info("Image upload is a demo. Using a placeholder image.");
-  console.log("Uploading image...", file.name);
-
-  // In a real implementation, you would upload to Supabase Storage like this.
-  // We'll set this up in the next step after creating the storage bucket.
-  /*
   const fileExt = file.name.split('.').pop();
   const fileName = `${crypto.randomUUID()}.${fileExt}`;
+  
+  toast.info(`Uploading ${file.name}...`);
   
   const { data, error } = await supabase.storage
     .from('document_images')
@@ -1001,6 +997,7 @@ export async function uploadDocumentImage(file: File): Promise<string> {
 
   if (error) {
     console.error('Error uploading image:', error);
+    toast.error(`Failed to upload image: ${error.message}`);
     throw error;
   }
 
@@ -1008,13 +1005,6 @@ export async function uploadDocumentImage(file: File): Promise<string> {
     .from('document_images')
     .getPublicUrl(data.path);
 
+  toast.success("Image uploaded successfully!");
   return publicUrl;
-  */
-
-  // For now, returning a placeholder with a simulated delay.
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(`https://placehold.co/600x400?text=${encodeURIComponent(file.name)}`);
-    }, 1000);
-  });
 }
