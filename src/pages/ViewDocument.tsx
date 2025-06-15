@@ -9,10 +9,11 @@ import DocumentRenderer from '@/components/DocumentRenderer';
 import Layout from '@/components/ui/layout';
 import { getDocument, updateDocument } from '@/lib/api';
 import { DOCUMENT_TYPES } from '@/types/documentTypes';
-import { ArrowLeft, Edit, Calendar, Clock, MessageSquare, ChevronDown, ChevronUp, Eye } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, Clock, MessageSquare, ChevronDown, ChevronUp, Eye, Download } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import GrandStrategistAssistant from '@/components/GrandStrategistAssistant';
+import { useDocumentExporter } from '@/hooks/use-document-exporter';
 
 const ViewDocument = () => {
   const { id } = useParams();
@@ -26,6 +27,7 @@ const ViewDocument = () => {
   const [title, setTitle] = useState('');
   const [showAI, setShowAI] = useState(true); // Always show AI chat on document open by default
   const [tocOpen, setTocOpen] = useState(!isMobile);
+  const { isExporting, exportToPdf } = useDocumentExporter();
 
   useEffect(() => {
     if (id) {
@@ -72,6 +74,12 @@ const ViewDocument = () => {
       toast.error('Failed to save document');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleExportPDF = () => {
+    if (document) {
+      exportToPdf('pdf-export-area', document.title);
     }
   };
 
@@ -254,14 +262,25 @@ const ViewDocument = () => {
                           </Button>
                         </div>
                       ) : (
-                        <Button
-                          size="sm"
-                          onClick={() => setIsEditing(true)}
-                          className="bg-white text-blue-600 hover:bg-white/90 flex-shrink-0"
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </Button>
+                        <div className="flex items-center space-x-2">
+                           <Button
+                            size="sm"
+                            onClick={handleExportPDF}
+                            disabled={isExporting}
+                            className="bg-white text-blue-600 hover:bg-white/90 flex-shrink-0"
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            {isExporting ? 'Exporting...' : 'Export PDF'}
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => setIsEditing(true)}
+                            className="bg-white text-blue-600 hover:bg-white/90 flex-shrink-0"
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -300,14 +319,16 @@ const ViewDocument = () => {
                     />
                   </div>
                 ) : (
-                  <div className="p-2">
-                    <DocumentRenderer 
-                      document={{
-                        ...document,
-                        content: content
-                      }} 
-                      className="min-h-96"
-                    />
+                  <div id="pdf-export-area">
+                    <div className="p-2">
+                      <DocumentRenderer 
+                        document={{
+                          ...document,
+                          content: content
+                        }} 
+                        className="min-h-96"
+                      />
+                    </div>
                   </div>
                 )}
               </CardContent>
