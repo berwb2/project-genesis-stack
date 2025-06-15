@@ -124,7 +124,7 @@ const ViewDocument = () => {
 
   return (
     <Layout className="bg-gradient-to-br from-blue-50 to-teal-50" mainClassName="p-0 md:p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full md:max-w-7xl md:mx-auto">
         <div className="mb-6 no-print px-4 md:px-0">
           <Button variant="ghost" asChild className="mb-4 text-blue-600 hover:text-blue-800">
             <Link to="/documents">
@@ -134,7 +134,7 @@ const ViewDocument = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 px-4 md:px-0">
           {tocExists && <DocumentTableOfContents content={content} />}
 
           <div className={`${tocExists ? 'lg:col-span-6' : 'lg:col-span-9'}`}>
