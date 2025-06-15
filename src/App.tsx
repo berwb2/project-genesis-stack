@@ -65,7 +65,7 @@ function App() {
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ThemeProvider defaultTheme="light" storageKey="deepwaters-theme">
+          <ThemeProvider defaultTheme="dark" storageKey="deepwaters-theme">
             <SoundProvider>
               <Toaster />
               <AppRoutes />
