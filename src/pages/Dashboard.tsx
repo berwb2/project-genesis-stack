@@ -10,7 +10,7 @@ import { FileText, FolderOpen, BookOpen, Brain, Plus, LayoutDashboard } from 'lu
 import { Link } from 'react-router-dom';
 import { listDocuments, getCurrentUser } from '@/lib/api';
 import { useIsMobile } from '@/hooks/use-mobile';
-import ContentLoader from '@/components/ContentLoader';
+import DashboardSkeleton from '@/components/DashboardSkeleton';
 
 const Dashboard = () => {
   const isMobile = useIsMobile();
@@ -61,7 +61,7 @@ const Dashboard = () => {
         
         <main className={`flex-1 ${isMobile ? 'px-2 pt-20' : 'p-8'} transition-all animate-fade-in overflow-y-auto`}>
           {isLoading ? (
-            <ContentLoader />
+            <DashboardSkeleton />
           ) : (
             <div className="max-w-7xl mx-auto">
               {/* Banner */}
