@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -43,7 +42,7 @@ const MobileNav = () => {
         <Button 
           variant="ghost" 
           size="icon"
-          className="md:hidden fixed top-4 left-4 z-50 bg-white shadow-md"
+          className="md:hidden"
         >
           <Menu className="h-5 w-5" />
         </Button>

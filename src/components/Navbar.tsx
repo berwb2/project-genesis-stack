@@ -16,6 +16,7 @@ import Logo from './Logo';
 import GlobalSearch from './GlobalSearch';
 import { getCurrentUser, signOut } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import MobileNav from './MobileNav';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -45,7 +46,8 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <Link to={user ? "/dashboard" : "/"} className="flex items-center">
+            <MobileNav />
+            <Link to={user ? "/dashboard" : "/"} className="flex items-center ml-2 md:ml-0">
               <Logo size="md" showText={true} />
             </Link>
           </div>
