@@ -613,8 +613,8 @@ export const updateAISession = async (sessionId: string, updates: { chat_history
 
 // Document management functions
 export const listDocuments = async (
-  filters: { contentType?: string } = {},
-  sortBy: { field: string; direction: 'asc' | 'desc' } = { field: 'created_at', direction: 'desc' },
+  filters: { contentType?: string; search?: string; folder_id?: string; } = {},
+  sortBy: { field: string; direction: 'asc' | 'desc' } = { field: 'updated_at', direction: 'desc' },
   page: number = 1,
   pageSize: number = 50
 ) => {
@@ -626,9 +626,45 @@ export const listDocuments = async (
     .select('*', { count: 'exact' })
     .eq('user_id', user.id);
 
+  // If a folder_id is provided, we must first get the document_ids from that folder.
+  if (filters.folder_id) {
+    // Verify folder ownership
+    const { data: folder } = await supabase
+      .from('document_folders')
+      .select('id')
+      .eq('id', filters.folder_id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (!folder) throw new Error('Folder not found or access denied');
+
+    const { data: folderDocs, error: folderDocsError } = await supabase
+      .from('folder_documents')
+      .select('document_id')
+      .eq('folder_id', filters.folder_id);
+
+    if (folderDocsError) {
+      console.error('Error fetching folder documents links:', folderDocsError);
+      throw folderDocsError;
+    }
+
+    const documentIds = folderDocs.map(fd => fd.document_id);
+
+    if (documentIds.length === 0) {
+      return { documents: [], total: 0, totalPages: 0, currentPage: 1, pageSize };
+    }
+    
+    query = query.in('id', documentIds);
+  }
+  
   // Apply content type filter if provided
   if (filters.contentType) {
     query = query.eq('content_type', filters.contentType);
+  }
+
+  // Apply search filter if provided
+  if (filters.search) {
+    query = query.or(`title.ilike.%${filters.search}%,content.ilike.%${filters.search}%`);
   }
 
   // Apply sorting

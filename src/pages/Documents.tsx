@@ -37,7 +37,7 @@ const Documents = () => {
   });
 
   const { data: documentsData, isLoading, refetch } = useQuery({
-    queryKey: ['documents', searchQuery, selectedType, currentPage, selectedFolder],
+    queryKey: ['documents', searchQuery, selectedType, currentPage, pageSize, selectedFolder],
     queryFn: async () => {
       const filters: any = {};
       
