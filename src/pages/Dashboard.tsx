@@ -57,7 +57,7 @@ const Dashboard = () => {
       <div className="flex">
         {!isMobile && <Sidebar />}
         
-        <main className={`flex-1 ${isMobile ? 'px-2 pt-20' : 'p-8'} transition-all`}>
+        <main className={`flex-1 ${isMobile ? 'px-2 pt-20' : 'p-8'} transition-all animate-fade-in`}>
           <div className="max-w-7xl mx-auto">
             {/* Banner */}
             <div className="rounded-2xl bg-gradient-to-r from-water-light to-blue-100 border border-water-light shadow mb-8 px-6 py-8 flex items-center gap-5 overflow-hidden relative">
