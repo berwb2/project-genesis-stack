@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Navbar from '@/components/Navbar';
@@ -78,7 +77,7 @@ const Dashboard = () => {
 
             {/* Quick Actions */}
             <div className={`grid gap-4 mb-10 ${isMobile ? 'grid-cols-2' : 'grid-cols-4'} transition-all`}>
-              <Card className="hover:scale-105 hover:shadow-xl border-water-light transition-all cursor-pointer bg-white/80">
+              <Card className="border-water-light cursor-pointer bg-white/80">
                 <CardContent className="p-5">
                   <Link to="/documents" className="block">
                     <div className="flex items-center gap-4">
@@ -94,7 +93,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className="hover:scale-105 hover:shadow-xl border-water-light transition-all cursor-pointer bg-white/80">
+              <Card className="border-water-light cursor-pointer bg-white/80">
                 <CardContent className="p-5">
                   <Link to="/folders" className="block">
                     <div className="flex items-center gap-4">
@@ -110,7 +109,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className="hover:scale-105 hover:shadow-xl border-water-light transition-all cursor-pointer bg-white/80">
+              <Card className="border-water-light cursor-pointer bg-white/80">
                 <CardContent className="p-5">
                   <Link to="/book-writer" className="block">
                     <div className="flex items-center gap-4">
@@ -126,7 +125,7 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card className="hover:scale-105 hover:shadow-xl border-water-light transition-all cursor-pointer bg-white/80">
+              <Card className="border-water-light cursor-pointer bg-white/80">
                 <CardContent className="p-5">
                   <Link to="/grand-strategist" className="block">
                     <div className="flex items-center gap-4">
@@ -167,7 +166,7 @@ const Dashboard = () => {
                     {recentDocuments.map((doc) => (
                       <div
                         key={doc.id}
-                        className="flex items-center justify-between p-3 bg-gradient-to-r from-white to-blue-50 rounded-xl hover:scale-[1.01] hover:shadow-md transition-all"
+                        className="flex items-center justify-between p-3 bg-gradient-to-r from-white to-blue-50 rounded-xl hover:-translate-y-1 hover:shadow-md transition-all"
                       >
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           <div className="flex items-center justify-center bg-blue-100 rounded-md h-10 w-10 flex-shrink-0">
