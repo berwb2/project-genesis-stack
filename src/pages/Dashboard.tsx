@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Navbar from '@/components/Navbar';
@@ -172,7 +171,7 @@ const Dashboard = () => {
                       {recentDocuments.map((doc) => (
                         <div
                           key={doc.id}
-                          className="flex items-center justify-between p-3 bg-gradient-to-r from-white to-blue-50 rounded-xl hover:-translate-y-1 hover:shadow-md transition-all"
+                          className="flex items-center justify-between p-3 bg-gradient-to-r from-white to-blue-50 rounded-xl hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div className="flex items-center justify-center bg-blue-100 rounded-md h-10 w-10 flex-shrink-0">
