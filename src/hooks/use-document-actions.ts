@@ -2,6 +2,7 @@
 import { useSound } from '@/contexts/SoundContext';
 import { createDocument } from '@/lib/api';
 import { toast } from '@/components/ui/sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export function useDocumentActions() {
   const { playSound } = useSound();
@@ -14,6 +15,7 @@ export function useDocumentActions() {
     metadata?: any;
   }) => {
     try {
+      await supabase.auth.refreshSession();
       const result = await createDocument(documentData);
       playSound('bubble');
       toast.success('Document created successfully!');

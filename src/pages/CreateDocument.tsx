@@ -12,10 +12,11 @@ import DocumentRenderer from '@/components/document/DocumentRenderer';
 import Layout from '@/components/ui/layout';
 import { useDocumentActions } from '@/hooks/use-document-actions';
 import { DOCUMENT_TYPES, DocumentType, getDocumentTypeTemplate } from '@/types/documentTypes';
-import { ArrowLeft, Eye, Edit } from 'lucide-react';
+import { ArrowLeft, Eye, Edit, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from '@/components/ui/sonner';
 import GrandStrategistAssistant from '@/components/GrandStrategistAssistant';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const CreateDocument = () => {
   const [searchParams] = useSearchParams();
@@ -78,6 +79,14 @@ const CreateDocument = () => {
   return (
     <Layout className="bg-gradient-to-br from-blue-50 to-teal-50" mainClassName="p-0 md:p-6">
       <div className="w-full md:max-w-7xl md:mx-auto">
+        <Alert variant="destructive" className="m-4 md:m-0 md:mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Maintenance Notice</AlertTitle>
+            <AlertDescription>
+              The app is undergoing major issues, please be aware maintenance is underway.
+            </AlertDescription>
+        </Alert>
+
         <div className="mb-6 px-4 md:px-0">
           <Button variant="ghost" asChild className="mb-4 text-blue-600 hover:text-blue-800">
             <Link to={folderId ? `/folders/${folderId}` : "/documents"}>
