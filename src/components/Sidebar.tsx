@@ -50,7 +50,7 @@ const Sidebar = () => {
         variant="ghost"
         size="icon"
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 bg-background border rounded-full h-6 w-6"
+        className="absolute -right-3 top-10 -translate-y-1/2 z-10 bg-background border rounded-full h-6 w-6"
       >
         {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </Button>
