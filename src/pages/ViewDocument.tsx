@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card } from "@/components/ui/card";
@@ -93,8 +92,8 @@ const ViewDocument = () => {
 
   if (isLoading) {
     return (
-      <Layout className="bg-gradient-to-br from-blue-50 to-teal-50">
-        <div className="max-w-4xl mx-auto">
+      <Layout className="bg-gradient-to-br from-blue-50 to-teal-50" mainClassName="p-0 md:p-6">
+        <div className="max-w-4xl mx-auto px-4">
           <div className="animate-pulse">
             <div className="h-8 bg-blue-200 rounded mb-4"></div>
             <div className="h-64 bg-blue-100 rounded"></div>
@@ -106,8 +105,8 @@ const ViewDocument = () => {
 
   if (!document) {
     return (
-      <Layout className="bg-gradient-to-br from-blue-50 to-teal-50">
-        <div className="max-w-4xl mx-auto text-center py-12">
+      <Layout className="bg-gradient-to-br from-blue-50 to-teal-50" mainClassName="p-0 md:p-6">
+        <div className="max-w-4xl mx-auto text-center py-12 px-4">
           <div className="bg-white rounded-xl p-8 shadow-lg">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Document not found</h1>
             <p className="text-gray-600 mb-6">The document you're looking for doesn't exist or has been removed.</p>
@@ -124,9 +123,9 @@ const ViewDocument = () => {
   }
 
   return (
-    <Layout className="bg-gradient-to-br from-blue-50 to-teal-50">
+    <Layout className="bg-gradient-to-br from-blue-50 to-teal-50" mainClassName="p-0 md:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6 no-print">
+        <div className="mb-6 no-print px-4 md:px-0">
           <Button variant="ghost" asChild className="mb-4 text-blue-600 hover:text-blue-800">
             <Link to="/documents">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -139,7 +138,7 @@ const ViewDocument = () => {
           {tocExists && <DocumentTableOfContents content={content} />}
 
           <div className={`${tocExists ? 'lg:col-span-6' : 'lg:col-span-9'}`}>
-            <Card className="border-blue-200 shadow-xl bg-white/95 backdrop-blur-sm print-section">
+            <Card className="border-blue-200 shadow-xl bg-white/95 backdrop-blur-sm print-section md:rounded-xl">
               <DocumentHeader
                 document={document}
                 title={title}
