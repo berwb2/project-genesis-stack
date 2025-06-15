@@ -15,6 +15,7 @@ import { User, Settings, LogOut } from 'lucide-react';
 import Logo from './Logo';
 import GlobalSearch from './GlobalSearch';
 import { getCurrentUser, signOut } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -52,8 +53,9 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             {user && <GlobalSearch />}
             
-            {!isLoading && (
-              user ? (
+            {isLoading && <Skeleton className="h-8 w-8 rounded-full" />}
+            {!isLoading &&
+              (user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -97,8 +99,7 @@ const Navbar = () => {
                     <Link to="/login">Get Started</Link>
                   </Button>
                 </div>
-              )
-            )}
+              ))}
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import Logo from './Logo';
 import { 
   Menu,
   Home,
@@ -49,9 +50,10 @@ const MobileNav = () => {
       </SheetTrigger>
       <SheetContent side="left" className="w-64 p-0">
         <div className="flex flex-col h-full">
-          <div className="p-6 border-b">
-            <h2 className="text-lg font-serif font-medium text-blue-600">DeepWaters</h2>
-            <p className="text-sm text-blue-600">Your AI-powered workspace</p>
+          <div className="flex items-center justify-center h-20 border-b border-blue-200">
+            <Link to="/dashboard">
+              <Logo size="md" />
+            </Link>
           </div>
           
           <nav className="flex-1 p-4 space-y-1">
