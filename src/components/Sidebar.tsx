@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import {
   Sparkles,
   Shield
 } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -43,23 +45,23 @@ const Sidebar = () => {
   }
   
   return (
-    <div className={`${collapsed ? 'w-20' : 'w-64'} bg-white border-r border-blue-200 flex flex-col transition-all duration-300 relative`}>
+    <div className={`${collapsed ? 'w-20' : 'w-64'} bg-white dark:bg-neutral-900 border-r border-blue-200 dark:border-neutral-800 flex flex-col transition-all duration-300 relative`}>
       <Button
         variant="ghost"
         size="icon"
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-6 z-10 bg-white border border-blue-200 rounded-full h-6 w-6"
+        className="absolute -right-3 top-6 z-10 bg-white dark:bg-neutral-800 border border-blue-200 dark:border-neutral-700 rounded-full h-6 w-6"
       >
         {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </Button>
 
-      <div className="flex items-center justify-center h-20 border-b border-blue-200">
+      <div className="flex items-center justify-center h-20 border-b border-blue-200 dark:border-neutral-800">
         <Link to="/dashboard">
           <Logo showText={!collapsed} size="md" />
         </Link>
       </div>
 
-      <div className="flex-1 p-4">
+      <div className="flex flex-col flex-1 p-4">
         <nav className="space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -79,6 +81,9 @@ const Sidebar = () => {
             );
           })}
         </nav>
+        <div className="mt-auto">
+          <ThemeToggle collapsed={collapsed} />
+        </div>
       </div>
     </div>
   );
