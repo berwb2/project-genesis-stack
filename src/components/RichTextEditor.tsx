@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -11,7 +10,7 @@ import TableRow from '@tiptap/extension-table-row';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from './editor/TableHeader';
 import TextAlign from '@tiptap/extension-text-align';
-import Image from '@tiptap/extension-image';
+import CustomImage from './editor/CustomImageExtension';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/atom-one-dark.css';
 
@@ -86,7 +85,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           class: 'luxury-table-cell',
         },
       }),
-      Image.configure({
+      CustomImage.configure({
         HTMLAttributes: {
           class: 'luxury-image',
         },
@@ -555,6 +554,18 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           margin-left: 1.5rem;
           margin-bottom: 0.5rem;
         }
+
+        /* NEW styles for resizable images */
+        .resizable-image-wrapper.is-selected .resizable {
+          outline: 2px solid #3b82f6;
+          resize: horizontal;
+          overflow: auto;
+        }
+        .resizable-image-wrapper .resizable {
+          max-width: 100%;
+          height: auto;
+        }
+        /* END NEW styles for resizable images */
 
         /* Mobile responsive adjustments */
         @media (max-width: 768px) {
