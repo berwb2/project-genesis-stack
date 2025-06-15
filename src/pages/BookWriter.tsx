@@ -1,13 +1,14 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Layout from '@/components/ui/layout';
-import GrandStrategistAssistantSidebar from '@/components/GrandStrategistAssistantSidebar';
+import GrandStrategistAssistant from '@/components/GrandStrategistAssistant';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Plus, Edit3, Save, Brain, FileText } from 'lucide-react';
+import { BookOpen, Plus, Edit3, Save, Brain, FileText, X } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentUser, listDocuments, updateDocument } from '@/lib/api';
@@ -532,11 +533,21 @@ const BookWriter = () => {
       </div>
       
       {showAISidebar && (
-        <GrandStrategistAssistantSidebar 
-          document={chapterDocumentForAI}
-          className="fixed right-0 top-16 h-[calc(100vh-4rem)] shadow-lg z-40"
-          onClose={() => setShowAISidebar(false)}
-        />
+        <div className="fixed right-0 top-16 h-[calc(100vh-4rem)] w-96 shadow-lg z-40 bg-white border-l flex flex-col">
+          <div className="p-2 border-b flex justify-between items-center bg-gray-50">
+              <h3 className="font-semibold text-sm pl-2">Grand Strategist Claude</h3>
+              <Button variant="ghost" size="icon" onClick={() => setShowAISidebar(false)}>
+                  <X className="h-4 w-4" />
+              </Button>
+          </div>
+          <GrandStrategistAssistant 
+            documentId={chapterDocumentForAI?.id}
+            documentTitle={chapterDocumentForAI?.title}
+            context={chapterDocumentForAI?.content}
+            variant="document"
+            className="h-full border-none shadow-none bg-transparent"
+          />
+        </div>
       )}
     </Layout>
   );
