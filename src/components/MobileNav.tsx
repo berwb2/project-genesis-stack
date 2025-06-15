@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -21,6 +20,7 @@ const MobileNav = () => {
           variant="ghost" 
           size="icon"
           className="md:hidden fixed top-3 left-3 z-50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm"
+          aria-label="Open Navigation"
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -53,7 +53,7 @@ const MobileNav = () => {
             })}
           </nav>
           <div className="p-4 border-t border-blue-200 dark:border-slate-800 flex justify-center">
-            {/* Add ThemeToggle so it's always easily accessible */}
+            {/* Keep ThemeToggle visible for mobile users */}
             <ThemeToggle />
           </div>
         </div>

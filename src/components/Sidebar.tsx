@@ -17,29 +17,31 @@ const Sidebar = () => {
   const isMobile = useIsMobile();
   
   const isActive = (path: string) => location.pathname === path;
-  
+
   if (isMobile) {
     return null; // Use MobileNav on mobile
   }
-  
+
   return (
     <div className={`${collapsed ? 'w-20' : 'w-64'} bg-white dark:bg-slate-900 border-r border-blue-200 dark:border-slate-800 flex flex-col transition-all duration-300 relative`}>
       <div className="flex items-center h-20 border-b border-blue-200 dark:border-slate-800 px-4 relative">
         {/* Collapse Button on far left */}
-        <div className="flex-shrink-0 flex items-center" style={{ minWidth: 32 }}>
+        <div className="flex-shrink-0 flex items-center justify-start" style={{ minWidth: 32 }}>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setCollapsed(!collapsed)}
-            className="bg-background border rounded-full h-6 w-6 mr-3"
+            className="bg-background border rounded-full h-6 w-6 mr-2"
+            style={{ marginLeft: 0 }}
+            aria-label="Collapse Sidebar"
           >
             {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
           </Button>
         </div>
         {/* Space between collapse button and logo */}
         <div className="flex-1" />
-        {/* Logo moved to the right */}
-        <Link to="/dashboard" className="flex items-center" style={{ marginRight: collapsed ? 0 : 0 }}>
+        {/* Logo positioned flush right in header, never covered */}
+        <Link to="/dashboard" className="flex items-center justify-end" style={{ minWidth: collapsed ? 0 : 120 }}>
           <Logo showText={!collapsed} size="md" />
         </Link>
       </div>
