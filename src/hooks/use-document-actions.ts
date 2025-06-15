@@ -15,7 +15,18 @@ export function useDocumentActions() {
     metadata?: any;
   }) => {
     try {
-      await supabase.auth.refreshSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.refreshSession();
+
+      if (sessionError) {
+        console.error('Session refresh error:', sessionError);
+        toast.error('Authentication error. Please log in again.');
+        throw sessionError;
+      }
+      if (!session) {
+        toast.error('You are not logged in. Please log in to create a document.');
+        throw new Error('User not authenticated');
+      }
+
       const result = await createDocument(documentData);
       playSound('bubble');
       toast.success('Document created successfully!');
