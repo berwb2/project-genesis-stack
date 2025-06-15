@@ -52,7 +52,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-water-light dark:from-neutral-900 dark:to-neutral-800 relative">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-water-light dark:from-slate-950 dark:to-slate-900 relative">
       <Navbar />
       <MobileNav />
       
@@ -65,7 +65,7 @@ const Dashboard = () => {
           ) : (
             <div className="max-w-7xl mx-auto">
               {/* Banner */}
-              <div className="rounded-2xl bg-gradient-to-r from-water-light to-blue-100 dark:from-neutral-800 dark:to-neutral-700/50 border border-water-light dark:border-neutral-700 shadow mb-8 px-6 py-8 flex items-center gap-5 overflow-hidden relative">
+              <div className="rounded-2xl bg-gradient-to-r from-water-light to-blue-100 dark:from-slate-800 dark:to-slate-800/50 border border-water-light dark:border-slate-700 shadow mb-8 px-6 py-8 flex items-center gap-5 overflow-hidden relative">
                 <div className="flex-shrink-0 hidden sm:block">
                   <div className="rounded-full bg-water dark:bg-sky-500 px-6 py-6 flex items-center justify-center shadow-md">
                     <LayoutDashboard className="h-10 w-10 text-white" />
@@ -83,7 +83,7 @@ const Dashboard = () => {
 
               {/* Quick Actions */}
               <div className={`grid gap-4 mb-10 ${isMobile ? 'grid-cols-2' : 'grid-cols-4'} transition-all`}>
-                <Card className="border-water-light dark:border-neutral-800 cursor-pointer bg-white/80 dark:bg-neutral-800/50 dark:hover:bg-neutral-800">
+                <Card className="border-water-light dark:border-slate-800 cursor-pointer bg-white/80 dark:bg-slate-900/50 dark:hover:bg-slate-800/80">
                   <CardContent className="p-5">
                     <Link to="/documents" className="block">
                       <div className="flex items-center gap-4">
@@ -91,7 +91,7 @@ const Dashboard = () => {
                           <FileText className="h-6 w-6 text-water dark:text-sky-400" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-water-deep dark:text-neutral-100">Documents</h3>
+                          <h3 className="font-semibold text-water-deep dark:text-slate-100">Documents</h3>
                           <p className="text-xs text-blue-700 dark:text-blue-400 opacity-80">Manage files</p>
                         </div>
                       </div>
@@ -99,7 +99,7 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="border-water-light dark:border-neutral-800 cursor-pointer bg-white/80 dark:bg-neutral-800/50 dark:hover:bg-neutral-800">
+                <Card className="border-water-light dark:border-slate-800 cursor-pointer bg-white/80 dark:bg-slate-900/50 dark:hover:bg-slate-800/80">
                   <CardContent className="p-5">
                     <Link to="/folders" className="block">
                       <div className="flex items-center gap-4">
@@ -107,7 +107,7 @@ const Dashboard = () => {
                           <FolderOpen className="h-6 w-6 text-water-deep dark:text-blue-400" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-water-deep dark:text-neutral-100">Folders</h3>
+                          <h3 className="font-semibold text-water-deep dark:text-slate-100">Folders</h3>
                           <p className="text-xs text-blue-700 dark:text-blue-400 opacity-80">Organize content</p>
                         </div>
                       </div>
@@ -115,7 +115,7 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="border-water-light dark:border-neutral-800 cursor-pointer bg-white/80 dark:bg-neutral-800/50 dark:hover:bg-neutral-800">
+                <Card className="border-water-light dark:border-slate-800 cursor-pointer bg-white/80 dark:bg-slate-900/50 dark:hover:bg-slate-800/80">
                   <CardContent className="p-5">
                     <Link to="/book-writer" className="block">
                       <div className="flex items-center gap-4">
@@ -123,7 +123,7 @@ const Dashboard = () => {
                           <BookOpen className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-water-deep dark:text-neutral-100">Write</h3>
+                          <h3 className="font-semibold text-water-deep dark:text-slate-100">Write</h3>
                           <p className="text-xs text-blue-700 dark:text-blue-400 opacity-80">Create books</p>
                         </div>
                       </div>
@@ -131,7 +131,7 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
 
-                <Card className="border-water-light dark:border-neutral-800 cursor-pointer bg-white/80 dark:bg-neutral-800/50 dark:hover:bg-neutral-800">
+                <Card className="border-water-light dark:border-slate-800 cursor-pointer bg-white/80 dark:bg-slate-900/50 dark:hover:bg-slate-800/80">
                   <CardContent className="p-5">
                     <Link to="/grand-strategist" className="block">
                       <div className="flex items-center gap-4">
@@ -139,7 +139,7 @@ const Dashboard = () => {
                           <Brain className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-water-deep dark:text-neutral-100">AI Chat</h3>
+                          <h3 className="font-semibold text-water-deep dark:text-slate-100">AI Chat</h3>
                           <p className="text-xs text-blue-700 dark:text-blue-400 opacity-80">Get insights</p>
                         </div>
                       </div>
@@ -149,7 +149,7 @@ const Dashboard = () => {
               </div>
 
               {/* Recent Documents */}
-              <Card className="border-water-light dark:border-neutral-800 bg-white/90 dark:bg-neutral-800/60 shadow-2xl rounded-2xl">
+              <Card className="border-water-light dark:border-slate-800 bg-white/90 dark:bg-slate-900/60 shadow-2xl rounded-2xl">
                 <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
                   <CardTitle className="text-water-deep dark:text-sky-300 font-serif text-xl">Recent Documents</CardTitle>
                   <Button variant="outline" size="sm" className="border-water dark:border-sky-500 dark:text-sky-300 dark:hover:bg-sky-900/50 dark:hover:text-sky-200" asChild>
@@ -172,7 +172,7 @@ const Dashboard = () => {
                       {recentDocuments.map((doc) => (
                         <div
                           key={doc.id}
-                          className="flex items-center justify-between p-3 bg-gradient-to-r from-white to-blue-50 dark:from-neutral-700/50 dark:to-neutral-900/10 rounded-xl hover:-translate-y-1 hover:shadow-lg dark:hover:bg-neutral-700 transition-all duration-300"
+                          className="flex items-center justify-between p-3 bg-gradient-to-r from-white to-blue-50 dark:from-slate-800/50 dark:to-slate-900/20 rounded-xl hover:-translate-y-1 hover:shadow-lg dark:hover:bg-slate-800 transition-all duration-300"
                         >
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div className="flex items-center justify-center bg-blue-100 dark:bg-sky-900/50 rounded-md h-10 w-10 flex-shrink-0">
@@ -180,7 +180,7 @@ const Dashboard = () => {
                             </div>
                             <div className="min-w-0">
                               <Link to={`/documents/${doc.id}`} className="block group">
-                                <h4 className="font-medium text-water-deep dark:text-neutral-100 group-hover:text-blue-600 dark:group-hover:text-sky-300 truncate">{doc.title}</h4>
+                                <h4 className="font-medium text-water-deep dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-sky-300 truncate">{doc.title}</h4>
                                 <p className="text-xs text-blue-800 dark:text-blue-400 opacity-80 mt-0.5 truncate">
                                   {doc.content_type} • Updated {formatDate(doc.updated_at)}
                                 </p>
