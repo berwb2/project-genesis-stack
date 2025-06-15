@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface LogoProps {
   className?: string;
@@ -21,7 +22,7 @@ const Logo = ({ className = '', showText = true, size = 'md' }: LogoProps) => {
   };
 
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className={cn('flex items-center gap-2 transition-transform duration-200 hover:scale-105', className)}>
       <div className={`${sizeClasses[size]} bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center shadow-lg flex-shrink-0`}>
         <span className="text-white font-bold text-sm">🌊</span>
       </div>
@@ -35,3 +36,4 @@ const Logo = ({ className = '', showText = true, size = 'md' }: LogoProps) => {
 };
 
 export default Logo;
+
