@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -36,8 +35,7 @@ export const useDocumentExporter = () => {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       
-      const imgProps= pdf.getImageProperties(imgData);
-      const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
 
       const headerHeight = 20;
       const footerHeight = 20;

@@ -1,39 +1,34 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import RichTextEditor from '@/components/RichTextEditor';
-import DocumentRenderer from '@/components/DocumentRenderer';
 import Layout from '@/components/ui/layout';
 import { getDocument, updateDocument } from '@/lib/api';
-import { DOCUMENT_TYPES } from '@/types/documentTypes';
-import { ArrowLeft, Edit, Calendar, Clock, MessageSquare, ChevronDown, ChevronUp, Eye, Download, Printer } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
-import { useIsMobile } from '@/hooks/use-mobile';
 import GrandStrategistAssistant from '@/components/GrandStrategistAssistant';
 import { useDocumentExporter } from '@/hooks/use-document-exporter';
+import DocumentHeader from '@/components/document/DocumentHeader';
+import DocumentTableOfContents from '@/components/document/DocumentTableOfContents';
+import DocumentContent from '@/components/document/DocumentContent';
 
 const ViewDocument = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const [document, setDocument] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
-  const [showAI, setShowAI] = useState(true); // Always show AI chat on document open by default
-  const [tocOpen, setTocOpen] = useState(!isMobile);
+  const [showAI, setShowAI] = useState(true);
   const { isExporting, exportToPdf } = useDocumentExporter();
 
   useEffect(() => {
     if (id) {
       loadDocument();
-      setShowAI(true); // Always show AI chat on document open by default
+      setShowAI(true);
     }
   }, [id]);
 
@@ -65,7 +60,6 @@ const ViewDocument = () => {
         content: content 
       });
       
-      // Reload document to get updated data
       await loadDocument();
       
       setIsEditing(false);
@@ -87,36 +81,15 @@ const ViewDocument = () => {
   const handlePrint = () => {
     window.print();
   };
-
-  const generateTableOfContents = () => {
-    if (!content) return [];
-    
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(content, 'text/html');
-    const headings = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    
-    return Array.from(headings).map((heading, index) => ({
-      id: `heading-${index}`,
-      text: heading.textContent || '',
-      level: parseInt(heading.tagName[1]),
-      element: heading
-    }));
+  
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setContent(document.content || '');
+    setTitle(document.title || '');
   };
 
-  const scrollToHeading = (text: string) => {
-    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    const targetHeading = Array.from(headings).find(h => {
-      const element = h as HTMLElement;
-      return element.textContent === text;
-    });
-    
-    if (targetHeading) {
-      const element = targetHeading as HTMLElement;
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  const tableOfContents = generateTableOfContents();
+  const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).filter(word => word.length > 0).length;
+  const tocExists = /<h[1-6]/.test(content);
 
   if (isLoading) {
     return (
@@ -150,13 +123,9 @@ const ViewDocument = () => {
     );
   }
 
-  const documentType = DOCUMENT_TYPES.find(type => type.id === document.content_type) || DOCUMENT_TYPES[0];
-  const wordCount = content.replace(/<[^>]*>/g, '').split(/\s+/).filter(word => word.length > 0).length;
-
   return (
     <Layout className="bg-gradient-to-br from-blue-50 to-teal-50">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="mb-6 no-print">
           <Button variant="ghost" asChild className="mb-4 text-blue-600 hover:text-blue-800">
             <Link to="/documents">
@@ -167,188 +136,35 @@ const ViewDocument = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Table of Contents - Left Sidebar */}
-          {tableOfContents.length > 0 && (
-            <div className="lg:col-span-3 no-print">
-              <Collapsible open={tocOpen} onOpenChange={setTocOpen}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="w-full mb-4 lg:hidden bg-white shadow-sm">
-                    Table of Contents
-                    {tocOpen ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <Card className="sticky top-6 bg-white/90 backdrop-blur-sm shadow-lg border-blue-100">
-                    <CardHeader className="pb-3 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-t-lg">
-                      <CardTitle className="text-sm font-medium flex items-center">
-                        <Eye className="mr-2 h-4 w-4" />
-                        Contents
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0 max-h-96 overflow-y-auto">
-                      <nav className="space-y-2 py-4">
-                        {tableOfContents.map((item, index) => (
-                          <button
-                            key={index}
-                            onClick={() => scrollToHeading(item.text)}
-                            className={`block text-left text-sm hover:text-blue-600 transition-all duration-200 w-full rounded-md p-2 hover:bg-blue-50 ${
-                              item.level === 1 ? 'font-semibold text-blue-900 text-base' :
-                              item.level === 2 ? 'ml-3 font-medium text-blue-800' :
-                              item.level === 3 ? 'ml-6 text-blue-700' :
-                              'ml-9 text-blue-600'
-                            }`}
-                          >
-                            {item.text}
-                          </button>
-                        ))}
-                      </nav>
-                    </CardContent>
-                  </Card>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          )}
+          {tocExists && <DocumentTableOfContents content={content} />}
 
-          {/* Main Content */}
-          <div className={`${tableOfContents.length > 0 ? 'lg:col-span-6' : 'lg:col-span-9'}`}>
+          <div className={`${tocExists ? 'lg:col-span-6' : 'lg:col-span-9'}`}>
             <Card className="border-blue-200 shadow-xl bg-white/95 backdrop-blur-sm print-section">
-              <CardHeader className="bg-gradient-to-r from-blue-600 to-teal-600 text-white print-section-header">
-                <div className="flex flex-col space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={title}
-                          onChange={(e) => setTitle(e.target.value)}
-                          className="text-xl sm:text-2xl font-bold bg-white/20 border border-white/30 outline-none focus:ring-2 focus:ring-white/50 rounded-lg px-3 py-2 w-full text-white placeholder-white/70 no-print"
-                          placeholder="Document title..."
-                        />
-                      ) : (
-                        <CardTitle className="text-xl sm:text-2xl text-white break-words leading-tight">
-                          {document.title}
-                        </CardTitle>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center space-x-2 no-print">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setShowAI(!showAI)}
-                        className="flex-shrink-0 bg-white/20 hover:bg-white/30 text-white border-white/30"
-                      >
-                        <MessageSquare className="mr-2 h-4 w-4" />
-                        {showAI ? 'Hide' : 'Show'} AI
-                      </Button>
-                      
-                      {isEditing ? (
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => {
-                              setIsEditing(false);
-                              setContent(document.content || '');
-                              setTitle(document.title || '');
-                            }}
-                            disabled={isSaving}
-                            className="bg-white/20 hover:bg-white/30 text-white border-white/30"
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={handleSave}
-                            disabled={isSaving || !title.trim()}
-                            className="bg-white text-blue-600 hover:bg-white/90"
-                          >
-                            {isSaving ? 'Saving...' : 'Save'}
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center space-x-2">
-                           <Button
-                            size="sm"
-                            onClick={handlePrint}
-                            className="bg-white text-blue-600 hover:bg-white/90 flex-shrink-0"
-                          >
-                            <Printer className="mr-2 h-4 w-4" />
-                            Print
-                          </Button>
-                           <Button
-                            size="sm"
-                            onClick={handleExportPDF}
-                            disabled={isExporting}
-                            className="bg-white text-blue-600 hover:bg-white/90 flex-shrink-0"
-                          >
-                            <Download className="mr-2 h-4 w-4" />
-                            {isExporting ? 'Exporting...' : 'Export PDF'}
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => setIsEditing(true)}
-                            className="bg-white text-blue-600 hover:bg-white/90 flex-shrink-0"
-                          >
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-wrap items-center gap-3 text-sm">
-                    <Badge variant="secondary" className={`${documentType.color} bg-white/20 text-white border-white/30 badge-print`}>
-                      {documentType.name}
-                    </Badge>
-                    
-                    <div className="flex items-center text-white/90">
-                      <Calendar className="mr-1 h-3 w-3" />
-                      <span className="hidden sm:inline">Created </span>
-                      {new Date(document.created_at).toLocaleDateString()}
-                    </div>
-                    
-                    <div className="flex items-center text-white/90">
-                      <Clock className="mr-1 h-3 w-3" />
-                      <span className="hidden sm:inline">Updated </span>
-                      {new Date(document.updated_at).toLocaleString()}
-                    </div>
-                    
-                    <div className="flex items-center text-white/90">
-                      <span>{wordCount} words</span>
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-
-              <CardContent className="p-0">
-                {isEditing ? (
-                  <div className="p-6 no-print">
-                    <RichTextEditor
-                      content={content}
-                      onChange={setContent}
-                      placeholder="Start writing your document content here..."
-                    />
-                  </div>
-                ) : (
-                  <div id="pdf-export-area">
-                    <div className="p-2">
-                      <DocumentRenderer 
-                        document={{
-                          ...document,
-                          content: content
-                        }} 
-                        className="min-h-96"
-                      />
-                    </div>
-                  </div>
-                )}
-              </CardContent>
+              <DocumentHeader
+                document={document}
+                title={title}
+                wordCount={wordCount}
+                isEditing={isEditing}
+                isSaving={isSaving}
+                isExporting={isExporting}
+                showAI={showAI}
+                onTitleChange={setTitle}
+                onSave={handleSave}
+                onCancel={handleCancelEdit}
+                onEdit={() => setIsEditing(true)}
+                onExportPDF={handleExportPDF}
+                onPrint={handlePrint}
+                onToggleAI={() => setShowAI(!showAI)}
+              />
+              <DocumentContent
+                isEditing={isEditing}
+                content={content}
+                onContentChange={setContent}
+                document={document}
+              />
             </Card>
           </div>
 
-          {/* AI Chat Panel */}
           {showAI && (
             <div className="lg:col-span-3 no-print">
               <GrandStrategistAssistant
