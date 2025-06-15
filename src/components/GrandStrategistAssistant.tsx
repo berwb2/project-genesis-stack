@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from '@/components/ui/sonner';
@@ -8,6 +7,7 @@ import ChatMessage from './chat/ChatMessage';
 import ChatInput from './chat/ChatInput';
 import ChatWelcome from './chat/ChatWelcome';
 import ChatLoadingIndicator from './chat/ChatLoadingIndicator';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface AIAssistantProps {
   context?: string;
@@ -100,8 +100,8 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
       
       const response = await callGrandStrategist(userMessage, documentPayload);
 
-      if (response && (response.response || response.result)) {
-        const assistantMessageContent = response.response || response.result;
+      if (response && response.result) {
+        const assistantMessageContent = response.result;
         const assistantMessage = { role: 'assistant', content: assistantMessageContent };
         const updatedMessages = [...newMessages, assistantMessage];
         setMessages(updatedMessages);
@@ -147,6 +147,19 @@ const GrandStrategistAssistant: React.FC<AIAssistantProps> = ({
   return (
     <Card className={cn("w-full h-full rounded-lg shadow-md flex flex-col bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-gray-200 dark:border-gray-700", className)}>
       <CardContent className="p-2 h-full flex flex-col">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src="/logo.png" alt="Grand Strategist" />
+              <AvatarFallback className="bg-blue-100 text-blue-600">GS</AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Grand Strategist</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">High-level Strategy & Planning</p>
+            </div>
+          </div>
+        </div>
+
         <div ref={chatContainerRef} className="flex-1 overflow-y-auto mb-2 space-y-4 p-2">
           {messages.length === 0 && !isLoading ? (
             <ChatWelcome
