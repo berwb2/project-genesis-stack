@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -43,7 +42,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             class: 'luxury-paragraph',
           },
         },
-        image: false, // Disable default image extension
         codeBlock: false, // Disable default code block to fix console warning
       }),
       CodeBlock.configure({
